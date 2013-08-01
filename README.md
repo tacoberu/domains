@@ -7,11 +7,11 @@ PHP DSL for quering between app and business layers.
 Inspirated by SQL, LINQ, or Dibi.
 Used for quering to database, file, filesystem, xml, anything.
 
-with - o jaká data máme zájem.
-where - podmínka, který musí být splněna na požadovaných datech.
-limit - kolik toho chceme,
-offset - posunutí okna
-orderByDesc, orderByAsc - seřazení výsledků.
+- with - o jaká data máme zájem.
+- where - podmínka, který musí být splněna na požadovaných datech.
+- limit - kolik toho chceme,
+- offset - posunutí okna
+- orderByDesc, orderByAsc - seřazení výsledků.
 
 
 Example
@@ -20,30 +20,31 @@ Example
 Příklad dotazu na soubor - dvacet souborů menších jak 400B včetně obsahu
 a informace o souboru:
 
-Criteria::range('IO/File', 20)
+
+```Criteria::range('IO/File', 20)
 	->with('fileInfo')
 	->with('content')
 	->where('fileInfo.size <', 400);
+```
 
-
-Criteria::range('Article', 20)
+```Criteria::range('Article', 20)
 	->with('fileInfo')
 	->with('content')
 	->where('fileInfo.size <', 400)
 	->orderByDesc('fileInfo.size');
+```
 
-
-Criteria::count('Article')
+```Criteria::count('Article')
 	->with('fileInfo')
 	->with('content')
 	->where('fileInfo.size <', 400);
+```
 
-
-Criteria::first('Article')
+```Criteria::first('Article')
 	->with('fileInfo')
 	->with('content')
 	->where('fileInfo.size <', 400);
-
+```
 
 
 

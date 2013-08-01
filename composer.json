@@ -11,6 +11,7 @@
 			"homepage": "http://martin.takac.name"
         }
     ],
+   	"license": ["MIT"],
 	"autoload": {
         "classmap": ["libs/"]
     }
