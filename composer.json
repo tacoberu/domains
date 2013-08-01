@@ -1,0 +1,17 @@
+{
+    "name": "taco/domains",
+    "description": "PHP DSL for quering between app and business layers.",
+    "require": {
+    	"php": ">=5.3.0"
+    },
+    "authors": [
+        {
+            "name": "Martin Takáč",
+            "email": "martin@takac.name",
+			"homepage": "http://martin.takac.name"
+        }
+    ],
+	"autoload": {
+        "classmap": ["libs/"]
+    }
+}
