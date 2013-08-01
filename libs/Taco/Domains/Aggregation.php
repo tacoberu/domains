@@ -50,6 +50,7 @@ abstract class Agregation implements IAgregation, ICriteria
 	}
 
 
+
 	/**
 	 * Standardní metoda readeru, která získává data.
 	 * @return string
@@ -75,7 +76,8 @@ abstract class Agregation implements IAgregation, ICriteria
 	 */
 	function with($name, $filter = Null)
 	{
-		return $this->criteria->with($name, $filter);
+		$this->criteria->with($name, $filter);
+		return $this;
 	}
 
 
