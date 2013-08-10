@@ -1,5 +1,5 @@
 {
-    "name": "taco/domains",
+    "name": "tacoberu/domains",
     "description": "PHP DSL for quering between app and business layers.",
     "require": {
     	"php": ">=5.3.0"
