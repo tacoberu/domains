@@ -21,36 +21,35 @@ Příklad dotazu na soubor - dvacet souborů menších jak 400B včetně obsahu
 a informace o souboru:
 
 
-```Criteria::range('IO/File', 20)
-	->with('fileInfo')
-	->with('content')
-	->where('fileInfo.size <', 400);
-```
+	Criteria::range('IO/File', 20)
+		->with('fileInfo')
+		->with('content')
+		->where('fileInfo.size <', 400);
 
-```Criteria::range('Article', 20)
-	->with('fileInfo')
-	->with('content')
-	->where('fileInfo.size <', 400)
-	->orderByDesc('fileInfo.size');
-```
 
-```Criteria::count('Article')
-	->with('fileInfo')
-	->with('content')
-	->where('fileInfo.size <', 400);
-```
+	Criteria::range('Article', 20)
+		->with('fileInfo')
+		->with('content')
+		->where('fileInfo.size <', 400)
+		->orderByDesc('fileInfo.size');
 
-```Criteria::first('Article')
-	->with('fileInfo')
-	->with('content')
-	->where('fileInfo.size <', 400);
-```
+
+	Criteria::count('Article')
+		->with('fileInfo')
+		->with('content')
+		->where('fileInfo.size <', 400);
+
+
+	Criteria::first('Article')
+		->with('fileInfo')
+		->with('content')
+		->where('fileInfo.size <', 400);
 
 
 
 Selector
 --------
-Helper for selectin attribs in criteriaum
+Helper for selectin attribs in criteriam
 
 
 
@@ -58,9 +57,7 @@ Helper for selectin attribs in criteriaum
 
 Validator
 ---------
-Slouží k validaci criteria, když chceme omezit které klíče to má ověřovat.
-
-
+Slouží k validaci criteria. Omezujeme tím prvky, nebo podmínky které může clinent uvádět.
 
 
 Formater
