@@ -14,6 +14,9 @@
 namespace Taco\Domains;
 
 
+use LogicException,
+	InvalidArgumentException;
+
 
 /**
  *	Výběr
@@ -29,7 +32,7 @@ class Selector
 	/**
 	 *	V jakém zdroji to budem vyhledávat.
 	 */
-	public function __construct($source)
+	function __construct(ICriteria $source)
 	{
 		$this->source = $source;
 	}
@@ -39,8 +42,9 @@ class Selector
 	/**
 	 *	Zjistí, zda je přítomna požadovaná klausule. V případě složeného výrazu,
 	 *	vrací celý výraz.
+	 * @return boolean
 	 */
-	public function with($clause)
+	function with($clause)
 	{
 		foreach ($this->source->getWith() as $item) {
 			if (is_string($item)) {
@@ -54,7 +58,7 @@ class Selector
 				}
 			}
 			else {
-				throw new \LogicException('Struktura criteria je nějaká rozbitá.');
+				throw new LogicException('Struktura criteria je nějaká rozbitá.');
 			}
 		}
 		return False;
@@ -64,8 +68,9 @@ class Selector
 
 	/**
 	 *	Existuje klausule?
+	 * @return boolean
 	 */
-	public function where($clause, $deep = False)
+	function where($clause, $deep = False)
 	{
 		return (boolean) self::findWhere($this->source->getWhere(), $clause, $deep);
 	}
@@ -73,9 +78,9 @@ class Selector
 
 
 	/**
-	 *	Existuje klausule?
+	 *	Existuje klausule? Tak mi ji vrať.
 	 */
-	public function whereExpr($clause, $deep = False)
+	function whereExpr($clause, $deep = False)
 	{
 		return self::findWhere($this->source->getWhere(), $clause, $deep);
 	}
@@ -83,29 +88,32 @@ class Selector
 
 
 	/**
-	 *	Existuje klausule?
+	 *	Existuje klausule? Musí.
 	 */
-	public function whereValue($clause, $index)
+	function whereValue($clause, $index = Null)
 	{
 		$c = self::findWhere($this->source->getWhere(), $clause, False);
 		if (! $c) {
-			throw new \InvalidArgumentException("Clause [$clause] is not found.", 3);
+			throw new InvalidArgumentException("Clause [$clause] is not found.", 3);
 		}
 		if (count($c) > 1) {
-			throw new \InvalidArgumentException("Clause [$clause] is multiple [" . count($c) . "].", 4);
+			throw new InvalidArgumentException("Clause [$clause] is multiple [" . count($c) . "].", 4);
 		}
 		$c = $c[0];
-		
-		if ($index > 0) {
+
+		if ($index !== Null) {
 			$values = $c->value();
-			if (! isset($values[$index])) {
-				throw new \InvalidArgumentException("Clause [$clause] value with index [$index] is not found.", 1);
-			}
-			return $values;
+			//~ dump($values);
+			//~ if (! isset($values[$index])) {
+				//~ throw new InvalidArgumentException("Clause [$clause] value with index [$index] is not found.", 1);
+			//~ }
+			return $values[$index];
 		}
-		else if (! $c->value()) {
-			throw new \InvalidArgumentException("Clause [$clause] value with index [$index] is not found.", 2);
-		}
+		//~ else if (! $c->value()) {
+//~ dump($c);
+			//~ die('A');
+			//~ throw new InvalidArgumentException("Clause [$clause] value with index [$index] is not found.", 2);
+		//~ }
 
 		return $c->value();
 	}
@@ -114,8 +122,9 @@ class Selector
 
 	/**
 	 *	Existuje klausule?
+	 * @return boolean
 	 */
-	public function orderBy($clause)
+	function orderBy($clause)
 	{
 		$c = $this->source->getOrderBy();
 		return isset($c[$clause]);
@@ -128,6 +137,10 @@ class Selector
 	 */
 	private static function findWhere($where, $clause, $deep)
 	{
+		if (empty($where)) {
+			return Null;
+		}
+
 		$ret = array();
 		foreach ($where->expresions() as $c) {
 			if ($c instanceof Cond) {
@@ -139,6 +152,7 @@ class Selector
 				$ret[] = $c;
 			}
 		}
+
 		return $ret;
 	}
 
