@@ -337,6 +337,37 @@ class ExprIn extends Expr
 
 
 
+/**
+ * Nevýskyt v množině.
+ */
+class ExprNotIn extends Expr
+{
+
+
+	function __construct($lft, array $rgt)
+	{
+		parent::__construct('not-in', $lft, $rgt);
+	}
+
+
+	function value()
+	{
+		return (array)parent::value();
+	}
+
+
+
+	function __toString()
+	{
+		$values = implode(', ', $this->value());
+		return "{$this->prop()} {$this->type()} ({$values})";
+	}
+
+
+}
+
+
+
 
 /**
  * Rovnost.
@@ -366,6 +397,3 @@ class ExprLike extends Expr
 
 
 }
-
-
-

@@ -16,8 +16,6 @@
 namespace Taco\Domains;
 
 
-
-
 /**
  * Criteria
  *
