@@ -41,10 +41,10 @@ class Criteria implements ICriteria
 
 
 	/**
-	 *	Zaznamy splnujici podnminky. Podminky jsou tecxtove klice.
-	 *  @var array
+	 * Podmínka je v podobě stromu. Kořenem bývá nejčastěji AND
+	 * @var Cond
 	 */
-	private	 $filter = array();
+	private	$filter = Null;
 
 
 
@@ -324,7 +324,8 @@ class Criteria implements ICriteria
 
 
 	/**
-	 *	Seznam omezení filtrace.
+	 * Seznam omezení filtrace.
+	 * @return Cond
 	 */
 	public function getWhere()
 	{
