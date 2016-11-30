@@ -97,20 +97,17 @@ class Selector
 			throw new InvalidArgumentException("Clause [$clause] is multiple [" . count($c) . "].", 4);
 		}
 		$c = $c[0];
-
-		if ($index !== Null) {
+		
+		if ($index > 0) {
 			$values = $c->value();
-			//~ dump($values);
-			//~ if (! isset($values[$index])) {
-				//~ throw new InvalidArgumentException("Clause [$clause] value with index [$index] is not found.", 1);
-			//~ }
-			return $values[$index];
+			if (! isset($values[$index])) {
+				throw new InvalidArgumentException("Clause [$clause] value with index [$index] is not found.", 1);
+			}
+			return $values;
 		}
-		//~ else if (! $c->value()) {
-//~ dump($c);
-			//~ die('A');
-			//~ throw new InvalidArgumentException("Clause [$clause] value with index [$index] is not found.", 2);
-		//~ }
+		else if (! $c->value()) {
+			throw new InvalidArgumentException("Clause [$clause] value with index [$index] is not found.", 2);
+		}
 
 		return $c->value();
 	}
@@ -134,10 +131,6 @@ class Selector
 	 */
 	private static function findWhere($where, $clause, $deep)
 	{
-		if (empty($where)) {
-			return Null;
-		}
-
 		$ret = array();
 		foreach ($where->expresions() as $c) {
 			if ($c instanceof Cond) {
