@@ -4,6 +4,13 @@
 	"require": {
 		"php": ">=5.3.0"
 	},
+	"require-dev": {
+		"php": ">=5.3.0",
+		"tracy/tracy": "2.*",
+		"phpunit/phpunit": "~4.0",
+		"sstalle/php7cc": "^1.1",
+		"phpmd/phpmd": "^2.6"
+	},
 	"authors": [
 		{
 			"name": "Martin Takáč",
