@@ -1,24 +1,26 @@
 <?php
 /**
- * This file is part of the Domains (https://github.com/tacoberu/domains)
- *
- * Copyright (c) 2004 Martin Takáč (http://martin.takac.name)
- *
- * For the full copyright and license information, please view
- * the file license.txt that was distributed with this source code.
+ * Copyright (c) since 2004 Martin Takáč (http://martin.takac.name)
+ * @license   https://opensource.org/licenses/MIT MIT
  */
 
 namespace Taco\Domains;
 
 
-
 /**
  * Výraz
  *
- * @author     Martin Takáč (taco@taco-beru.name)
+ * @author Martin Takáč <martin@takac.name>
  */
 interface IExpr
 {
+
+	/**
+	 * Operátor, název výrazu.
+	 * @return string
+	 */
+	function type();
+
 }
 
 
@@ -34,97 +36,60 @@ interface IExpr
  * a <= b
  * a >= b
  *
- * @author     Martin Takáč (taco@taco-beru.name)
+ * @author Martin Takáč <martin@takac.name>
  */
-class Expr implements IExpr
+abstract class Expr implements IExpr
 {
-
 
 	/**
 	 * Levá strana výrazu.
 	 */
-	protected $lft;
+	private $prop;
 
 
 
 	/**
 	 * Pravá strana výrazu.
 	 */
-	protected $rgt;
-
-
-
-	/**
-	 * Operand.
-	 */
-	protected $op;
-
+	private $value;
 
 
 	/**
-	 * @param Objekt.
+	 * @param string
+	 * @param mixin
+	 * @param mixin
 	 */
-	function __construct($op, $lft, $rgt)
+	function __construct($prop, $value)
 	{
-		$this->op = strtoupper($op);
-		$this->lft = $lft;
-		$this->rgt = $rgt;
+		$this->prop = $prop;
+		$this->value = $value;
 	}
 
 
 
 	/**
-	 * Typ výrazu.
-	 */
-	function type()
-	{
-		return $this->op;
-	}
-
-
-
-	/**
-	 * Oprátor
-	 */
-	function op()
-	{
-		return $this->op;
-	}
-
-
-
-	/**
-	 * Název property.
+	 * Name of property.
+	 * @return string
 	 */
 	function prop()
 	{
-		return $this->lft;
+		return $this->prop;
 	}
 
 
 
 	/**
-	 * Název property.
-	 */
-	function id()
-	{
-		return $this->prop();
-	}
-
-
-
-	/**
-	 * Hodnota
+	 * @return mixin
 	 */
 	function value()
 	{
-		return $this->rgt;
+		return $this->value;
 	}
 
 
 
 	/**
-	 * Podmínka jsoucnosti: id = 1
+	 * @return string
 	 */
 	function __toString()
 	{
@@ -146,7 +111,7 @@ class Expr implements IExpr
 	/**
 	 * Podmínka jsoucnosti: id IN(1,3,5)
 	 */
-	public static function in($prop, array $values)
+	static function in($prop, array $values)
 	{
 		return new ExprIn($prop, $values);
 	}
@@ -154,36 +119,55 @@ class Expr implements IExpr
 
 
 	/**
+	 * Podmínka jsoucnosti: id NOTIN(1,3,5)
+	 */
+	static function notin($prop, array $values)
+	{
+		return new ExprNotIn($prop, $values);
+	}
+
+
+
+	/**
 	 * Podmínka jsoucnosti: title LIKE 'ahoj'
 	 */
-	public static function like($prop, $text)
+	static function like($prop, $text)
 	{
 		return new ExprLike($prop, $text);
 	}
 
 
 
+	/**
+	 * Podmínka jsoucnosti: title NOTLIKE 'ahoj'
+	 */
+	static function notlike($prop, $text)
+	{
+		return new ExprNotLike($prop, $text);
+	}
+
 }
 
 
 
 /**
- * Rovnost.
+ * Rovnost, nebo ekvivalence.
+ * a = 3
  */
 class ExprIs extends Expr
 {
 
-
 	/**
-	 * @param Objekt.
+	 * Operátor
+	 * @return string
 	 */
-	function __construct($lft, $rgt)
+	function type()
 	{
-		parent::__construct('=', $lft, $rgt);
+		return '=';
 	}
 
-
 }
+
 
 
 /**
@@ -201,9 +185,18 @@ class ExprThisIsEquals extends Expr
 	 */
 	function __construct($rgt)
 	{
-		parent::__construct(self::MASK, Null, $rgt);
+		parent::__construct(Null, $rgt);
 	}
 
+
+	/**
+	 * Operátor
+	 * @return string
+	 */
+	function type()
+	{
+		return self::MASK;
+	}
 
 }
 
@@ -215,39 +208,88 @@ class ExprThisIsEquals extends Expr
 class ExprIsNot extends Expr
 {
 
-
 	/**
-	 * @param Objekt.
+	 * Operátor
+	 * @return string
 	 */
-	function __construct($lft, $rgt)
+	function type()
 	{
-		parent::__construct('!=', $lft, $rgt);
+		return '!=';
 	}
 
-
 }
-
 
 
 
 /**
- * Negace
+ * Větší než.
  */
-class ExprNot extends Expr
+class ExprGreaterThan extends Expr
 {
 
-
 	/**
-	 * @param Objekt.
+	 * @return string
 	 */
-	function __construct($lft)
+	function type()
 	{
-		parent::__construct('NOT', Null, $lft);
+		return '>';
 	}
-
 
 }
 
+
+
+/**
+ * Menší než.
+ */
+class ExprLessThan extends Expr
+{
+
+	/**
+	 * @return string
+	 */
+	function type()
+	{
+		return '<';
+	}
+
+}
+
+
+
+/**
+ * Větší než nebo rovno.
+ */
+class ExprGreaterOrEqualThan extends Expr
+{
+
+	/**
+	 * @return string
+	 */
+	function type()
+	{
+		return '>=';
+	}
+
+}
+
+
+
+/**
+ * Menší než nebo rovno.
+ */
+class ExprLessOrEqualThan extends Expr
+{
+
+	/**
+	 * @return string
+	 */
+	function type()
+	{
+		return '<=';
+	}
+
+}
 
 
 
@@ -263,12 +305,20 @@ class ExprIsNull extends Expr
 	 */
 	function __construct($lft)
 	{
-		parent::__construct('ISNULL', $lft, Null);
+		parent::__construct($lft, Null);
 	}
 
 
-}
+	/**
+	 * Operátor
+	 * @return string
+	 */
+	function type()
+	{
+		return 'ISNULL';
+	}
 
+}
 
 
 
@@ -284,12 +334,20 @@ class ExprIsNotNull extends Expr
 	 */
 	function __construct($lft)
 	{
-		parent::__construct('ISNOTNULL', $lft, Null);
+		parent::__construct($lft, Null);
 	}
 
 
-}
+	/**
+	 * Operátor
+	 * @return string
+	 */
+	function type()
+	{
+		return 'ISNOTNULL';
+	}
 
+}
 
 
 
@@ -304,7 +362,17 @@ class ExprIn extends Expr
 	 */
 	function __construct($lft, array $rgt)
 	{
-		parent::__construct('in', $lft, $rgt);
+		parent::__construct($lft, $rgt);
+	}
+
+
+	/**
+	 * Operátor
+	 * @return string
+	 */
+	function type()
+	{
+		return 'IN';
 	}
 
 
@@ -328,9 +396,7 @@ class ExprIn extends Expr
 		return "{$this->prop()} {$this->type()} ({$values})";
 	}
 
-
 }
-
 
 
 
@@ -340,11 +406,21 @@ class ExprIn extends Expr
 class ExprNotIn extends Expr
 {
 
-
 	function __construct($lft, array $rgt)
 	{
-		parent::__construct('not-in', $lft, $rgt);
+		parent::__construct($lft, $rgt);
 	}
+
+
+
+	/**
+	 * @return string
+	 */
+	function type()
+	{
+		return 'NOTIN';
+	}
+
 
 
 	function value()
@@ -360,14 +436,12 @@ class ExprNotIn extends Expr
 		return "{$this->prop()} {$this->type()} ({$values})";
 	}
 
-
 }
 
 
 
-
 /**
- * Rovnost.
+ * Odpovídá pasce.
  */
 class ExprLike extends Expr
 {
@@ -378,7 +452,17 @@ class ExprLike extends Expr
 	 */
 	function __construct($lft, $rgt)
 	{
-		parent::__construct('like', $lft, $rgt);
+		parent::__construct($lft, $rgt);
+	}
+
+
+
+	/**
+	 * @return string
+	 */
+	function type()
+	{
+		return 'LIKE';
 	}
 
 
@@ -391,6 +475,82 @@ class ExprLike extends Expr
 		return "{$this->prop()} {$this->type()} '{$this->value()}'";
 	}
 
+}
 
+
+
+/**
+ * Neodpovídá masce.
+ */
+class ExprNotLike extends Expr
+{
+
+
+	/**
+	 * @param Objekt.
+	 */
+	function __construct($lft, $rgt)
+	{
+		parent::__construct($lft, $rgt);
+	}
+
+
+
+	/**
+	 * @return string
+	 */
+	function type()
+	{
+		return 'NOTLIKE';
+	}
+
+
+
+	/**
+	 * Podmínka jsoucnosti: id = 1
+	 */
+	function __toString()
+	{
+		return "{$this->prop()} {$this->type()} '{$this->value()}'";
+	}
+
+}
+
+
+
+/**
+ * Negace
+ */
+class ExprNot extends Expr
+{
+
+	/**
+	 * @param Objekt.
+	 */
+	function __construct($lft)
+	{
+		parent::__construct(Null, $lft);
+	}
+
+
+
+	/**
+	 * Operátor
+	 * @return string
+	 */
+	function type()
+	{
+		return 'NOT';
+	}
+
+
+
+	/**
+	 * @return string
+	 */
+	function __toString()
+	{
+		return "{$this->type()} {$this->value()}";
+	}
 
 }
