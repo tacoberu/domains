@@ -1,124 +1,65 @@
 <?php
 /**
- * This file is part of the Domains (https://github.com/tacoberu/domains)
- *
- * Copyright (c) 2004 Martin Takáč (http://martin.takac.name)
- *
- * For the full copyright and license information, please view
- * the file license.txt that was distributed with this source code.
+ * Copyright (c) since 2004 Martin Takáč (http://martin.takac.name)
+ * @license   https://opensource.org/licenses/MIT MIT
  */
 
 namespace Taco\Domains;
+
+use InvalidArgumentException;
 
 
 /**
  * Převádí textový zápis na objekty.
  *
- * @author     Martin Takáč (taco@taco-beru.name)
+ * @author Martin Takáč <martin@takac.name>
  */
 class Parser
 {
 
 	/**
-	 * Označení pro sebe sama.
+	 * Vytvoří instanci třídy Filter na základě textu. Umí i nabindovat volitelné argumenty.
+	 *
+	 * @param string $expr Like '[id = ?]'
+	 * @param array $args Values for ? in $expr.
+	 * @return Filter
 	 */
-	const EQUALS = '@';
+	static function parseFilter($expr, array $args = [])
+	{
+		// where - v případě filter je to jednodužší, páč to nic dalšího neumí.
+		if ($i = strpos($expr, '[')) {
+			$whereexpr = substr(trim(substr($expr, 7)), 1, -1);
+			return new Filter(substr($expr, 0, 7), self::parseWhere($whereexpr));
+		}
+	}
+
 
 
 	/**
 	 * Nastavi podminku do Criteria
 	 * @param mixed
 	 * @example
-	 * $criteria->where('code LIKE', $code);
+	 * $criteria->parseWhere(['code LIKE', $code]);
 	 *
-	 * @return ICriteria
+	 * @return [ Expr ]
 	 */
-	static function formatWhere(array $args)
+	static function parseWhere($expr, array $args = [])
 	{
-		$ret = array();
-
-		while ($expr = array_shift($args)) {
-			// Dokavad jsou to ciste vyrazy, tak je skladame,
-			if ($expr instanceof IExpr) {
-				$ret[] = $expr;
-			}
-			// Jakmile jsou prerusene něčím jiným, zkusíme to znova od začátku.
-			else {
-				break;
-			}
+		if (empty($expr)) {
+			throw new InvalidArgumentException("Empty where-conds.");
 		}
-
-		if (empty($expr) && !count($args)) {
-			return $ret;
-		}
-
-		$prop = trim($expr);
-		if (preg_match('~^[a-zA-Z\.\-\_]+$~', $prop, $matches)) {
-			if (count($args) > 1) {
-				throw new \InvalidArgumentException('Prilis mnoho parametru: ' . count($args));
-			}
-			$ret[] = Expr::is($matches[0], $args[0]);
-		}
-		else if (preg_match('~([a-zA-Z\.\-\_]+)\s?(.+)~', $prop, $matches)) {
-			switch (strtoupper($matches[2])) {
-				case '=':
-					if (count($args) > 1) {
-						throw new \InvalidArgumentException('Prilis mnoho parametru: ' . count($args));
-					}
-					$ret[] = Expr::is($matches[1], $args[0]);
-					break;
-
-				case '!=':
-				case '<>':
-					if (count($args) > 1) {
-						throw new \InvalidArgumentException('Prilis mnoho parametru: ' . count($args));
-					}
-					$ret[] = new Expr('!=', $matches[1], $args[0]);
-					break;
-
-				case 'IN':
-				case 'LIKE':
-					if (count($args) > 1) {
-						throw new \InvalidArgumentException('Prilis mnoho parametru: ' . count($args));
-					}
-					$fce = strtolower($matches[2]);
-					$ret[] = Expr::$fce($matches[1], $args[0]);
-					break;
-
-				case '<':
-				case '>':
-				case '>=':
-				case '<=':
-					$ret[] = new Expr($matches[2], $matches[1], $args[0]);
-					break;
-
-				case 'NULL':
-				case 'ISNULL':
-					$ret[] = new ExprIsNull($matches[1]);
-					break;
-
-				case 'NOTNULL':
-				case 'ISNOTNULL':
-					$ret[] = new ExprIsNotNull($matches[1]);
-					break;
-
-				case 'HAS':
-					$ret[] = new Expr('HAS', $matches[1], $args[0]);
-					break;
-
-				default:
-					throw new \InvalidArgumentException('Unknow type operator: expr[' . $expr . '] -> args[ '. print_r($args, true) . '].');
-			}
-		}
-		elseif($prop == self::EQUALS) {
-			$ret[] = new ExprThisIsEquals($args[0]);
+		$tok = new Tokenizer($args);
+		if ($expr{0} === '(') {
+			list($expr, $tail) = $tok->parseConds($expr);
 		}
 		else {
-			throw new \InvalidArgumentException($prop);
+			list($expr, $tail) = $tok->parseExpr($expr);
 		}
 
-		return $ret;
+		if ($tail) {
+			throw new InvalidArgumentException("Unsuported where-conds: `{$tail}'.");
+		}
+		return $expr;
 	}
-
 
 }

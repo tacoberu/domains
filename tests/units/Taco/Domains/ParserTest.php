@@ -1,130 +1,258 @@
 <?php
 /**
- * This file is part of the Taco Library (http://dev.taco-beru.name)
- *
- * Copyright (c) 2004, 2011 Martin Takáč (http://martin.takac.name)
- *
- * For the full copyright and license information, please view
- * the file license.txt that was distributed with this source code.
- *
- * PHP version 5.3
+ * Copyright (c) since 2004 Martin Takáč (http://martin.takac.name)
+ * @license   https://opensource.org/licenses/MIT MIT
  */
 
+namespace Taco\Domains;
 
-require_once __dir__ . '/../../../../libs/Taco/Domains/Parser.php';
-require_once __dir__ . '/../../../../libs/Taco/Domains/Expr.php';
-require_once __dir__ . '/../../../../libs/Taco/Domains/Cond.php';
-require_once __dir__ . '/../../../../libs/Taco/Domains/exceptions.php';
-
-
-
-use Taco\Domains;
+use PHPUnit_Framework_TestCase;
+use InvalidArgumentException;
 
 
 /**
- *
- * @call phpunit ParserTest.php tests_libs_taco_dhe_ParserTest
+ * @call phpunit ParserTest.php
+ * @author Martin Takáč <martin@takac.name>
  */
-class tests_libs_taco_dhe_ParserTest extends PHPUnit_Framework_TestCase
+class ParserTest extends PHPUnit_Framework_TestCase
 {
 
-
-
-	/**
-	 *	Různé podmínky na stejný sloupce.
-	 */
-	public function testEmpty()
+	function testEmpty()
 	{
-		$a = Domains\Parser::formatWhere(array(''));
-		$this->assertEquals($a, array());
+		$this->setExpectedException(InvalidArgumentException::class, 'Empty where-conds.');
+		Parser::parseWhere('');
+	}
+
+
+
+	function testFailRequireArg()
+	{
+		$this->setExpectedException(InvalidArgumentException::class, 'Unexcepted bound of arguments. Require 0s index.');
+		Parser::parseWhere('id =');
+	}
+
+
+
+	function testFailRequireArg2()
+	{
+		$this->setExpectedException(InvalidArgumentException::class, 'Unexcepted bound of arguments. Require 0s index.');
+		Parser::parseWhere('id');
+	}
+
+
+
+	function _testFailRequireArg3()
+	{
+		$this->setExpectedException(InvalidArgumentException::class, 'Unexcepted bound of arguments. Require 0s index.');
+		Parser::parseWhere('id', [1, 5]);
+	}
+
+
+
+	function testCondAnd()
+	{
+		$a = Parser::parseWhere('(id != ? AND id = ?)', [42, 43]);
+		$this->assertEquals('(id != 42 AND id = 43)', (string)$a);
+	}
+
+
+
+	function testCondOr()
+	{
+		$a = Parser::parseWhere('(id != ? OR id = ?)', [42, 43]);
+		$this->assertEquals('(id != 42 OR id = 43)', (string)$a);
 	}
 
 
 
 	/**
-	 *	Různé podmínky na stejný sloupce.
+	 * @dataProvider provideParseWhereWithBind
 	 */
-	public function __testSample()
+	function testParseWhereWithBind($expr, $bindmap, $expected)
 	{
-		$a = Domains\Parser::formatWhere(array('id ='));
-		$this->assertEquals($a, array());
+		$this->assertEquals($expected, Parser::parseWhere($expr, $bindmap));
 	}
 
+
+
+	function provideParseWhereWithBind()
+	{
+		return [
+			'is' =>
+				[ 'id = ?'
+				, [6]
+				, new ExprIs('id', 6)
+				],
+			'is 1' =>
+				[ 'id ='
+				, [7]
+				, new ExprIs('id', 7)
+				],
+			//~ 'is 2' =>
+				//~ [ 'id = '
+				//~ , [8]
+				//~ , new ExprIs('id', 8)
+				//~ ],
+			'is 3' =>
+				[ 'id = ?'
+				, [9]
+				, new ExprIs('id', 9)
+				],
+			//~ 'is 2' =>
+				//~ [ 'id'
+				//~ , [8]
+				//~ , new ExprIs('id', 8)
+				//~ ],
+			'is not' =>
+				[ 'id !='
+				, [7]
+				, new ExprIsNot('id', 7)
+				],
+			'is not 2' =>
+				[ 'id <>'
+				, [7]
+				, new ExprIsNot('id', 7)
+				],
+			'is <' =>
+				[ 'id <'
+				, [7]
+				, new ExprLessThan('id', 7)
+				],
+			'is <=' =>
+				[ 'id <='
+				, [7]
+				, new ExprLessOrEqualThan('id', 7)
+				],
+			'is >' =>
+				[ 'id >'
+				, [7]
+				, new ExprGreaterThan('id', 7)
+				],
+			'is >=' =>
+				[ 'id >='
+				, [7]
+				, new ExprGreaterOrEqualThan('id', 7)
+				],
+			'is null' =>
+				[ 'id ISNULL'
+				, ['fake']
+				, new ExprIsNull('id')
+				],
+			'is null 2' =>
+				[ 'id NULL'
+				, ['fake']
+				, new ExprIsNull('id')
+				],
+			'is not null' =>
+				[ 'id ISNOTNULL'
+				, ['fake']
+				, new ExprIsNotNull('id')
+				],
+			'in' =>
+				[ 'id IN'
+				, [[222]]
+				, new ExprIn('id', [222])
+				],
+			'in 2' =>
+				[ 'id IN'
+				, [[222, 555]]
+				, new ExprIn('id', [222, 555])
+				],
+			'not in' =>
+				[ 'id NOTIN'
+				, [[222]]
+				, new ExprNotIn('id', [222])
+				],
+			'not in 2' =>
+				[ 'id NOTIN'
+				, [[222, 888]]
+				, new ExprNotIn('id', [222, 888])
+				],
+			'like' =>
+				[ 'id LIKE'
+				, ["abc"]
+				, new ExprLike('id', "abc")
+				],
+			'not like' =>
+				[ 'id NOTLIKE'
+				, ["abc"]
+				, new ExprNotLike('id', "abc")
+				],
+			'condition with and' =>
+				[ '(age = ? AND access = false)'
+				, [5]
+				, new CondAnd([ new ExprIs('age', 5), new ExprIs('access', false), ])
+				],
+			'condition with or' =>
+				[ '(age = ? OR access = false)'
+				, [5]
+				, new CondOr([ new ExprIs('age', 5), new ExprIs('access', false), ])
+				],
+		];
+	}
 
 
 
 	/**
-	 *	Různé podmínky na stejný sloupce.
+	 * @dataProvider provideParseFilter
 	 */
-	public function _testSampleIs()
+	function testParseFilter($expr, $expected)
 	{
-		$a = Domains\Parser::formatWhere(array('id'));
-		print_r($a);
-		//$this->assertEquals($a, array());
+		$this->assertEquals($expected, Parser::parseFilter($expr));
 	}
 
 
 
-	/**
-	 *	Různé podmínky na stejný sloupce.
-	 */
-	public function testSampleIsA()
+	function provideParseFilter()
 	{
-		$a = Domains\Parser::formatWhere(array('id', 42));
-		$this->assertEquals(count($a), 1);
-		$this->assertEquals(get_class($a[0]), 'Taco\Domains\ExprIs');
-		$this->assertEquals($a[0]->type(), '=');
-		$this->assertEquals($a[0]->prop(), 'id');
-		$this->assertEquals($a[0]->value(), 42);
+		return [
+			'is' =>
+				[ 'Article[(id = 5)]'
+				, (new Filter('Article'))->where('id =', 5)
+				],
+			'is 2' =>
+				[ 'Article[(id = 5) ] '
+				, (new Filter('Article'))->where('id =', 5)
+				],
+			'like' =>
+				[ 'Article[(id LIKE "L*") ] '
+				, (new Filter('Article'))->where('id LIKE', "L*")
+				],
+			'Conditon with OR' =>
+				[ 'Article[(id = 5 OR id = 6) ] '
+				, (new Filter('Article'))->where(new CondOr( [ new ExprIs('id', 5), new ExprIs('id', 6) ] ))
+				],
+			'Conditon with AND' =>
+				[ 'Article[(id = 5 AND id = 6) ] '
+				, (new Filter('Article'))->where(new CondAnd( [ new ExprIs('id', 5), new ExprIs('id', 6) ] ))
+				],
+			'many' =>
+				[ 'Article[(name = "foo" OR title = "boo")]'
+				, (new Filter('Article'))->where(new CondOr( [ new ExprIs('name', "foo"), new ExprIs('title', "boo") ] ))
+				],
+			'many 2' =>
+				[ 'Article[(name = "foo" OR (title = "boo" OR name LIKE "a*"))]'
+				, (new Filter('Article'))->where(new CondOr(
+					[ new ExprIs('name', "foo")
+					, new CondOr(
+						[ new ExprIs('title', "boo")
+						, new ExprLike('name', "a*")
+						])
+					]))
+				],
+			'many' =>
+				[ 'Article[(name = "foo" OR title = "boo" OR (name LIKE "a*" OR name LIKE "b*" OR name LIKE "c*"))]'
+				, (new Filter('Article'))->where(new CondOr(
+					[ new ExprIs('name', "foo")
+					, new ExprIs('title', "boo")
+					, new CondOr(
+						[ new ExprLike('name', "a*")
+						, new ExprLike('name', "b*")
+						, new ExprLike('name', "c*")
+						])
+					]))
+				],
+		];
 	}
-
-
-
-
-	/**
-	 *	Různé podmínky na stejný sloupce.
-	 */
-	public function testSampleIsB()
-	{
-		$a = Domains\Parser::formatWhere(array('id =', 42));
-		$this->assertEquals(count($a), 1);
-		$this->assertEquals(get_class($a[0]), 'Taco\Domains\ExprIs');
-		$this->assertEquals($a[0]->type(), '=');
-		$this->assertEquals($a[0]->prop(), 'id');
-		$this->assertEquals($a[0]->value(), 42);
-	}
-
-
-
-	/**
-	 *	Různé podmínky na stejný sloupce.
-	 */
-	public function testSampleIsB2()
-	{
-		$a = Domains\Parser::formatWhere(array('id=', 42));
-		$this->assertEquals(count($a), 1);
-		$this->assertEquals(get_class($a[0]), 'Taco\Domains\ExprIs');
-		$this->assertEquals($a[0]->type(), '=');
-		$this->assertEquals($a[0]->prop(), 'id');
-		$this->assertEquals($a[0]->value(), 42);
-	}
-
-
-
-	/**
-	 *	Různé podmínky na stejný sloupce.
-	 */
-	public function _testSampleIsC()
-	{
-		$a = Domains\Parser::formatWhere(array('id = %i', 42));
-		$this->assertEquals(count($a), 1);
-		$this->assertEquals(get_class($a[0]), 'Taco\Domains\ExprIs');
-		$this->assertEquals($a[0]->type(), '=');
-		$this->assertEquals($a[0]->prop(), 'id');
-		$this->assertEquals($a[0]->value(), 42);
-	}
-
-
-
 
 }
