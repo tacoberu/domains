@@ -1,15 +1,10 @@
 <?php
 /**
- * This file is part of the Domains (https://github.com/tacoberu/domains)
- *
- * Copyright (c) 2004 Martin Takáč (http://martin.takac.name)
- *
- * For the full copyright and license information, please view
- * the file license.txt that was distributed with this source code.
+ * Copyright (c) since 2004 Martin Takáč (http://martin.takac.name)
+ * @license   https://opensource.org/licenses/MIT MIT
  */
 
 namespace Taco\Domains;
-
 
 
 /**
