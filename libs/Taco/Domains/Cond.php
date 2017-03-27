@@ -1,23 +1,20 @@
 <?php
 /**
- * This file is part of the Domains (https://github.com/tacoberu/domains)
- *
- * Copyright (c) 2004 Martin Takáč (http://martin.takac.name)
- *
- * For the full copyright and license information, please view
- * the file license.txt that was distributed with this source code.
+ * Copyright (c) since 2004 Martin Takáč (http://martin.takac.name)
+ * @license   https://opensource.org/licenses/MIT MIT
  */
 
 namespace Taco\Domains;
 
 
-
 /**
- * Condition - podmínka,
+ * Condition - podmínka. Podmínka existuje sama o sobě. Je ji možné použít
+ * v případě WHERE u SELECTu, ale třeba i u DELETE, UPDATE. Stejně tak jako u
+ * v případě JOIN - když bychom Criteria chápali jako SQL.
  *
- * @author     Martin Takáč (taco@taco-beru.name)
+ * @author Martin Takáč <martin@takac.name>
  */
-class Cond implements IExpr
+abstract class Cond implements IExpr
 {
 
 	const TYPE_AND = 'AND';
@@ -29,23 +26,6 @@ class Cond implements IExpr
 	 * Seznam podmínek.
 	 */
 	private $list = array();
-
-
-
-	/**
-	 * Operand.
-	 */
-	protected $type;
-
-
-
-	/**
-	 * Typ výrazu.
-	 */
-	function type()
-	{
-		return $this->type;
-	}
 
 
 	/**
@@ -80,60 +60,64 @@ class Cond implements IExpr
 		return '(' . implode(' ' . $this->type() . ' ', $this->expresions()) . ')';
 	}
 
-
-
 }
 
 
 
 /**
- * Condition - podmínka,
+ * Condition - výrazy s OR.
  *
- * @author     Martin Takáč (taco@taco-beru.name)
+ * @author     Martin Takáč <martin@takac.name>
  */
 class CondOr extends Cond
 {
 
-
 	/**
 	 * Podmínka jsoucnosti: (id = 1 OR id = 2 OR id = 5)
-	 * @param Objekt.
 	 */
-	public function __construct()
+	function __construct(array $args)
 	{
-		$this->type = self::TYPE_OR;
-		foreach (Parser::formatWhere(func_get_args()) as $expr) {
+		foreach ($args as $expr) {
 			$this->add($expr);
 		}
 	}
 
 
 
+	function type()
+	{
+		return self::TYPE_OR;
+	}
+
 }
 
 
+
 /**
- * Condition - podmínka,
+ * Condition - podmínka slučovací.
  *
- * @author     Martin Takáč (taco@taco-beru.name)
+ * @author     Martin Takáč <martin@takac.name>
  */
 class CondAnd extends Cond
 {
-
 
 	/**
 	 * Podmínka jsoucnosti: (id = 1 AND id = 2 AND id = 5)
 	 * @param Objekt.
 	 */
-	public function __construct()
+	function __construct(array $args)
 	{
-		$this->type = self::TYPE_AND;
-		foreach (Parser::formatWhere(func_get_args()) as $expr) {
+		foreach ($args as $expr) {
 			$this->add($expr);
 		}
 	}
 
 
+
+	function type()
+	{
+		return self::TYPE_AND;
+	}
 
 }
 
@@ -142,7 +126,7 @@ class CondAnd extends Cond
 /**
  * Condition - podmínka,
  *
- * @author     Martin Takáč (taco@taco-beru.name)
+ * @author     Martin Takáč (martin@takac.name>
  */
 class _FuncNot extends Cond
 {
@@ -153,14 +137,18 @@ class _FuncNot extends Cond
 	 * Negace: NOT (id = 1 AND id = 2 AND id = 5)
 	 * @param Objekt.
 	 */
-	public function __construct()
+	function __construct()
 	{
-		$this->type = self::TYPE_NOT;
-		foreach (Parser::formatWhere(func_get_args()) as $expr) {
+		foreach (Parser::parseWhere(func_get_args()) as $expr) {
 			$this->add($expr);
 		}
 	}
 
 
+
+	function type()
+	{
+		return self::TYPE_NOT;
+	}
 
 }

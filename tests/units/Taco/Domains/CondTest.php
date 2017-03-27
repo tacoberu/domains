@@ -1,79 +1,115 @@
 <?php
 /**
- * This file is part of the Taco Library (http://dev.taco-beru.name)
- *
- * Copyright (c) 2004, 2011 Martin Takáč (http://martin.takac.name)
- *
- * For the full copyright and license information, please view
- * the file license.txt that was distributed with this source code.
- *
- * PHP version 5.3
+ * Copyright (c) since 2004 Martin Takáč (http://martin.takac.name)
+ * @license   https://opensource.org/licenses/MIT MIT
  */
 
+namespace Taco\Domains;
 
-require_once __dir__ . '/../../../../libs/Taco/Domains/Parser.php';
-require_once __dir__ . '/../../../../libs/Taco/Domains/Expr.php';
-require_once __dir__ . '/../../../../libs/Taco/Domains/Cond.php';
-require_once __dir__ . '/../../../../libs/Taco/Domains/exceptions.php';
-
-
-
-use Taco\Domains;
+use InvalidArgumentException;
+use PHPUnit_Framework_TestCase;
 
 
 /**
- *
- * @call phpunit CondTest.php tests_libs_taco_dhe_CondTest
+ * @call phpunit CondTest.php CondTest
+ * @author Martin Takáč <martin@takac.name>
  */
-class tests_libs_taco_dhe_CondTest extends PHPUnit_Framework_TestCase
+class CondTest extends PHPUnit_Framework_TestCase
 {
 
-
-
-	/**
-	 *
-	 */
-	public function testCoreExpr()
+	function testAndEmpty()
 	{
-		$a = new Domains\CondAnd();
-		$this->assertEquals($a->type(), 'AND');
-		//$this->assertNull($a->id());
-		$this->assertEquals((string)$a, '');
+		$a = new CondAnd([]);
+		$this->assertEquals('AND', $a->type());
+		$this->assertEquals([], $a->expresions());
+		$this->assertEquals('', (string)$a);
 	}
 
 
 
-	/**
-	 *
-	 */
-	public function testCoreOne()
+	function testAndSingle()
 	{
-		$a = new Domains\CondAnd();
-		$a->add(new Domains\ExprIs('i', 5));
-		$this->assertEquals($a->type(), 'AND');
-		//$this->assertEquals($a->id(), 'AND');
-		$this->assertEquals((string)$a, '(i = 5)');
+		$a = new CondAnd([]);
+		$a->add(new ExprIs('i', 5));
+		$this->assertEquals('AND', $a->type());
+		$this->assertEquals([
+			new ExprIs('i', 5),
+		], $a->expresions());
+		$this->assertEquals('(i = 5)', (string)$a);
 	}
 
 
 
-	/**
-	 *
-	 */
-	public function testCoreMany()
+	function testAndMany()
 	{
-		$a = new Domains\CondAnd();
-		$a->add(new Domains\ExprIs('i', 5));
-		$a->add(new Domains\ExprIs('i', 19));
-		$a->add(new Domains\ExprIs('i', 8));
-		$this->assertEquals($a->type(), 'AND');
-		$this->assertEquals((string)$a, '(i = 5 AND i = 19 AND i = 8)');
+		$a = new CondAnd([]);
+		$a->add(new ExprIs('i', 5));
+		$a->add(new ExprIs('i', 19));
+		$a->add(new ExprIs('i', 8));
+		$this->assertEquals('AND', $a->type());
+		$this->assertEquals('(i = 5 AND i = 19 AND i = 8)', (string)$a);
+		$this->assertEquals([
+			new ExprIs('i', 5),
+			new ExprIs('i', 19),
+			new ExprIs('i', 8),
+		], $a->expresions());
 	}
 
 
 
+	function testOrEmpty()
+	{
+		$a = new CondOr([]);
+		$this->assertEquals('OR', $a->type());
+		$this->assertEquals([], $a->expresions());
+		$this->assertEquals('', (string)$a);
+	}
 
 
 
+	function testOrSingle()
+	{
+		$a = new CondOr([]);
+		$a->add(new ExprIs('i', 5));
+		$this->assertEquals('OR', $a->type());
+		$this->assertEquals([
+			new ExprIs('i', 5),
+		], $a->expresions());
+		$this->assertEquals('(i = 5)', (string)$a);
+	}
+
+
+
+	function testOrMany()
+	{
+		$a = new CondOr([]);
+		$a->add(new ExprIs('i', 5));
+		$a->add(new ExprIs('i', 19));
+		$a->add(new ExprIs('i', 8));
+		$this->assertEquals('OR', $a->type());
+		$this->assertEquals('(i = 5 OR i = 19 OR i = 8)', (string)$a);
+		$this->assertEquals([
+			new ExprIs('i', 5),
+			new ExprIs('i', 19),
+			new ExprIs('i', 8),
+		], $a->expresions());
+	}
+
+
+
+	function testCombine()
+	{
+		$a = new CondOr([]);
+		$a->add(new ExprIs('i', 5));
+		$a->add(new ExprIs('i', 19));
+		$b = new CondOr([]);
+		$b->add(new ExprIs('a', 5));
+		$b->add(new ExprIs('b', 19));
+		$c = new CondAnd([]);
+		$c->add($a);
+		$c->add($b);
+		$c->add(new ExprIs('x', 'abc'));
+		$this->assertEquals('((i = 5 OR i = 19) AND (a = 5 OR b = 19) AND x = abc)', (string)$c);
+	}
 
 }
