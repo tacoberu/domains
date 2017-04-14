@@ -19,6 +19,25 @@ class Printer
 	/**
 	 * @return string
 	 */
+	static function formatFilter(Filter $src)
+	{
+		$res = [];
+		$filter = [];
+		if ($x = self::formatWhere($src->getWhere())) {
+			$filter[] = $x;
+		}
+		if (count($filter)) {
+			$res[] = '[' . implode('|', $filter) . ']';
+		}
+
+		return $src->getTypeName() . implode('', $res);
+	}
+
+
+
+	/**
+	 * @return string
+	 */
 	static function formatWhere(IExpr $expr = Null)
 	{
 		if (empty($expr)) {

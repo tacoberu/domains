@@ -116,4 +116,34 @@ class PrinterTest extends PHPUnit_Framework_TestCase
 		];
 	}
 
+
+
+	/**
+	 * @dataProvider provideFormatFilter
+	 */
+	function testFormatFilter($expr, $expected)
+	{
+		$this->assertEquals($expected, Printer::formatFilter($expr));
+	}
+
+
+
+	function provideFormatFilter()
+	{
+		return [
+			'<empty>' =>
+				[ new Filter('Article')
+				, 'Article'
+				],
+			'is' =>
+				[ (new Filter('Article'))->where('id', 5)
+				, 'Article[(id = 5)]'
+				],
+			'is many' =>
+				[ (new Filter('Article'))->where('id', 5)->where('code', 15)
+				, 'Article[(id = 5 AND code = 15)]'
+				],
+		];
+	}
+
 }
