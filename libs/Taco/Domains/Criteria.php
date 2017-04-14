@@ -1,40 +1,26 @@
 <?php
 /**
- * This file is part of the Domains (https://github.com/tacoberu/domains)
- *
- * Copyright (c) 2004 Martin Takáč (http://martin.takac.name)
- *
- * For the full copyright and license information, please view
- * the file license.txt that was distributed with this source code.
+ * Copyright (c) since 2004 Martin Takáč (http://martin.takac.name)
+ * @license   https://opensource.org/licenses/MIT MIT
  */
 
 namespace Taco\Domains;
 
+use InvalidArgumentException;
 
 
 /**
- * Criteria
+ * Komplexní požadavek na nějaká data. Obsahuje filtrování, řazení, omezení na stránky.
  *
- * Pozadavek dat.
- *
- * @author     Martin Takáč (taco@taco-beru.name)
+ * @author Martin Takáč <martin@takac.name>
  */
-class Criteria implements ICriteria
+class Criteria
 {
-
-
-	/**
-	 * Typ požadovaného prvku.
-	 */
-	protected $typeName;
-
-
 
 	/**
 	 * Jmeno prvku. Bud je to string, nebo instance.
 	 */
 	private $with = array();
-
 
 
 	/**
@@ -44,12 +30,10 @@ class Criteria implements ICriteria
 	private $filter = array();
 
 
-
 	/**
 	 * Setrideno.
 	 */
 	private $orderBy = array();
-
 
 
 	/**
@@ -58,12 +42,10 @@ class Criteria implements ICriteria
 	private $offset = NULL;
 
 
-
 	/**
 	 * Omezení počtu.
 	 */
 	private $limit = NULL;
-
 
 
 	/**
@@ -73,9 +55,8 @@ class Criteria implements ICriteria
 	private $frozen = FALSE;
 
 
-
 	/**
-	 * @param Objekt.
+	 * @param Object|string
 	 */
 	static function create($type)
 	{
@@ -85,7 +66,9 @@ class Criteria implements ICriteria
 
 
 	/**
-	 * @param Objekt.
+	 * @param Object|string
+	 * @param int
+	 * @param int
 	 */
 	static function range($type, $limit = 40, $offset = 0)
 	{
@@ -97,29 +80,19 @@ class Criteria implements ICriteria
 
 
 	/**
-	 * @param Objekt.
-	 */
-	static function first($type, $limit = 40, $offset = 0)
-	{
-		return new AgregationFirst(self::create($type));
-	}
-
-
-
-	/**
-	 * @param Objekt.
+	 * @param Object|string.
 	 */
 	function __construct($type)
 	{
 		if (empty($type)) {
-			throw new \InvalidArgumentException('Type object of criteria not found.');
+			throw new InvalidArgumentException('Type object of criteria not found.');
 		}
 
 		if (is_object($type)) {
 			$type = get_class($type);
 		}
 
-		$this->typeName = $type;
+		$this->filter = new Filter($type);
 	}
 
 
@@ -189,24 +162,14 @@ class Criteria implements ICriteria
 	 * @param mixed
 	 * @example
 	 * $criteria->where('code LIKE', $code);
+	 * $criteria->where(new ExprLike('code', $code));
 	 *
 	 * @return ICriteria
 	 */
 	function where($expresion)
 	{
 		$args = func_get_args();
-
-		if (empty($this->filter)) {
-			$list = new CondAnd();
-			$this->filter = $list;
-		}
-		else {
-			$list = $this->filter;
-		}
-		foreach (Parser::formatWhere($args) as $expr) {
-			$this->filter->add($expr);
-		}
-
+		call_user_func_array([$this->filter, 'where'], $args);
 		$this->updating();
 		return $this;
 	}
@@ -305,7 +268,7 @@ class Criteria implements ICriteria
 	 */
 	function getTypeName()
 	{
-		return $this->typeName;
+		return $this->filter->getTypeName();
 	}
 
 
@@ -326,7 +289,7 @@ class Criteria implements ICriteria
 	 */
 	function getWhere()
 	{
-		return $this->filter;
+		return $this->filter->getWhere();
 	}
 
 
@@ -359,56 +322,6 @@ class Criteria implements ICriteria
 	function getLimit()
 	{
 		return $this->limit;
-	}
-
-
-
-	/**
-	 * Výpočet hashe pro tento dotaz.
-	 * @return string
-	 */
-	function hash()
-	{
-		$s = $this->getTypeName() . '|';
-
-		if (count($this->getWith())) {
-			$a = $this->getWith();
-			sort($a);
-			$s .= 'select:[' . implode(';', $a) . ']';
-		}
-
-		if (count($this->getWhere())) {
-			$a = array();
-			foreach ($this->getWhere() as $row) {
-				$tmp = array();
-				foreach ($row->args as $arg) {
-					if (is_object($arg)) {
-						$tmp[] = get_class($arg);
-					}
-					else if (is_integer($arg)) {
-						$tmp[] = 'INT';
-					}
-					else if (is_string($arg)) {
-						$tmp[] = 'STRING';
-					}
-					else {
-						$tmp[] = gettype($arg);
-					}
-				}
-				$a[] = $row->expr . '=' . implode(',', $tmp);
-			}
-			sort($a);
-			$s .= 'where:[' . implode(';', $a) . ']';
-		}
-
-		if (count($this->getOrderBy())) {
-			$a = array();
-			foreach ($this->getOrderBy() as $name => $dir) {
-				$a[] = "$name:$dir";
-			}
-			$s .= 'orderby:[' . implode(';', $a) . ']';
-		}
-		return md5($s);
 	}
 
 

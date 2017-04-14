@@ -19,6 +19,32 @@ class Printer
 	/**
 	 * @return string
 	 */
+	static function format(Criteria $criteria)
+	{
+		$res = [];
+		$filter = [];
+		if ($x = self::formatWhere($criteria->getWhere())) {
+			$filter[] = $x;
+		}
+		if ($x = self::formatLimitOffset($criteria)) {
+			$filter[] = $x[0] . ':' . $x[1];
+		}
+		if (count($filter)) {
+			$res[] = '[' . implode('|', $filter) . ']';
+		}
+
+		if ($withs = self::formatWiths($criteria)) {
+			$res[] = '{' . implode(', ', $withs) . '}';
+		}
+
+		return $criteria->getTypeName() . implode('', $res);
+	}
+
+
+
+	/**
+	 * @return string
+	 */
 	static function formatFilter(Filter $src)
 	{
 		$res = [];

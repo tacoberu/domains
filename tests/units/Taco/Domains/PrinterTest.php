@@ -146,4 +146,106 @@ class PrinterTest extends PHPUnit_Framework_TestCase
 		];
 	}
 
+
+
+	/**
+	 * @dataProvider provideFormat
+	 */
+	function testFormat($criteria, $expected)
+	{
+		$this->assertEquals($expected, Printer::format($criteria));
+	}
+
+
+
+	function provideFormat()
+	{
+		return [
+			'<empty>' =>
+				[ Criteria::create('Article')
+				, 'Article'
+				],
+			'is' =>
+				[ Criteria::create('Article')->where('id', 5)
+				, 'Article[(id = 5)]'
+				],
+			'is many' =>
+				[ Criteria::create('Article')->where('id', 5)->where('code', 15)
+				, 'Article[(id = 5 AND code = 15)]'
+				],
+			'is not' =>
+				[ Criteria::create('Article')->where('id !=', 5)
+				, 'Article[(id != 5)]'
+				],
+			'is null' =>
+				[ Criteria::create('Article')->where('id ISNULL', 5)
+				, 'Article[(id ISNULL)]'
+				],
+			'is not null' =>
+				[ Criteria::create('Article')->where('id ISNOTNULL', 5)
+				, 'Article[(id ISNOTNULL)]'
+				],
+			'is like' =>
+				[ Criteria::create('Article')->where('id LIKE', 'foo*')
+				, 'Article[(id LIKE "foo*")]'
+				],
+			'is not like' =>
+				[ Criteria::create('Article')->where('id NOTLIKE', 'foo*')
+				, 'Article[(id NOTLIKE "foo*")]'
+				],
+			'is in' =>
+				[ Criteria::create('Article')->where('id IN', ['a', 'b', 'c'])
+				, 'Article[(id IN ["a", "b", "c"])]'
+				],
+			'is not in' =>
+				[ Criteria::create('Article')->where('id NOTIN', ['a', 'b', 'c'])
+				, 'Article[(id NOTIN ["a", "b", "c"])]'
+				],
+			'or' =>
+				[ Criteria::create('Article')->where('id', 11)->where('name', 'foo')
+				, 'Article[(id = 11 AND name = "foo")]'
+				],
+			'and' =>
+				[ Criteria::create('Article')->where('id', 11)->where(new CondAnd([new ExprIs('name', 'foo'), new ExprIs('title', 'boo')]))
+				, 'Article[(id = 11 AND (name = "foo" AND title = "boo"))]'
+				],
+			'or 2' =>
+				[ Criteria::create('Article')->where(new CondOr([new ExprIs('name', 'foo'), new ExprIs('title', 'boo')]))
+				, 'Article[(name = "foo" OR title = "boo")]'
+				],
+			'tree' =>
+				[ Criteria::create('Article')->where(new CondOr([
+						new ExprIs('name', 'foo'),
+						new ExprIs('title', 'boo'),
+						new CondOr([
+							new ExprLike('name', 'a'),
+							new ExprLike('name', 'b'),
+							new ExprLike('name', 'c'),
+						]),
+					]))
+				, 'Article[(name = "foo" OR title = "boo" OR (name LIKE "a" OR name LIKE "b" OR name LIKE "c"))]'
+				],
+			'with limit' =>
+				[ Criteria::create('Article')->where('id', 5)->limit(10)
+				, 'Article[(id = 5)|:10]'
+				],
+			'with offset' =>
+				[ Criteria::create('Article')->where('id', 5)->offset(18)
+				, 'Article[(id = 5)|18:]'
+				],
+			'with limit and offset' =>
+				[ Criteria::create('Article')->where('id', 5)->limit(10)->offset(25)
+				, 'Article[(id = 5)|25:10]'
+				],
+			'with key' =>
+				[ Criteria::create('Article')->where('id', 5)->with('*')->with('poka')
+				, 'Article[(id = 5)]{*, poka}'
+				],
+			'with all' =>
+				[ Criteria::create('Article')->where('id', 5)->with('*')
+				, 'Article[(id = 5)]{*}'
+				],
+		];
+	}
+
 }
