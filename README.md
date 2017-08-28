@@ -148,3 +148,13 @@ Slouží k validaci criteria. Omezujeme tím prvky, nebo podmínky které může
 Formater
 --------
 Překládá kriterium na jiný formát. Například pro dibi, pro Doctrine a podobně.
+
+
+TODO
+----
+
+- refactoring názvů
+- zanořený dotazy
+- print, deserialize tak aby to vrátilo hodnotu
+- oprava pojmenovaných argumnentů
+- validace na elementy
