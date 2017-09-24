@@ -26,7 +26,7 @@ class Tokenizer
 	private $index = 0;
 
 
-	function __construct(array $binds = [])
+	function __construct(array $binds = array())
 	{
 		$this->binds = $binds;
 	}
@@ -48,12 +48,12 @@ class Tokenizer
 			case preg_match('~^(NOT\s+)?(\w+)\s+([=!<>]+)\s+(.*)~s', $source, $matches):
 				list($arg, $tail) = $this->parseArgs($matches[4]);
 				$expr = self::buildExpr($matches[1], $matches[2], $matches[3], $arg);
-				return [$expr, ltrim($tail)];
+				return array($expr, ltrim($tail));
 			// "NOT abc =", [42]
 			case preg_match('~^(NOT\s+)?(\w+)\s+([=!<>]+\s*)$~s', $source, $matches):
 				list($arg, $_) = $this->parseArgs('?');
 				$expr = self::buildExpr($matches[1], $matches[2], $matches[3], $arg);
-				return [$expr, ''];
+				return array($expr, '');
 			// IN, NOTIN
 			case preg_match('~^(\w+)\s+(NOTIN|IN)\s*(.*)?~s', $source, $matches):
 				if (strlen($matches[3])) {
@@ -64,7 +64,7 @@ class Tokenizer
 					$tail = '';
 				}
 				$expr = self::buildExpr(null, $matches[1], strtoupper($matches[2]), $arg);
-				return [$expr, ltrim($tail)];
+				return array($expr, ltrim($tail));
 			// LIKE, NOTLIKE
 			case preg_match('~^(\w+)\s+(LIKE|NOTLIKE)\s*(.*)?~s', $source, $matches):
 				if (strlen($matches[3])) {
@@ -75,16 +75,16 @@ class Tokenizer
 					$tail = '';
 				}
 				$expr = self::buildExpr(null, $matches[1], $matches[2], $arg);
-				return [$expr, ltrim($tail)];
+				return array($expr, ltrim($tail));
 			// ISNULL, ISNOTNULL
 			case preg_match('~^(\w+)\s+(ISNULL|NULL|ISNOTNULL)(.*)~s', $source, $matches):
 				$expr = self::buildExpr(null, $matches[1], $matches[2], null);
-				return [$expr, ltrim($matches[3])];
+				return array($expr, ltrim($matches[3]));
 			// "NOT abc", [42]
 			case preg_match('~^(NOT\s+)?(\w+)\s*(.*)$~s', $source, $matches):
 				list($arg, $_) = $this->parseArgs('?');
 				$expr = self::buildExpr($matches[1], $matches[2], '=', $arg);
-				return [$expr, ''];
+				return array($expr, '');
 			default:
 				throw new InvalidArgumentException("Unsuported expression: `{$source}'.");
 		}
@@ -102,7 +102,7 @@ class Tokenizer
 		if (empty($source)) {
 			throw new InvalidArgumentException("Empty expression.");
 		}
-		$res = [];
+		$res = array();
 		$op = null;
 		while(true) {
 			switch (true) {
@@ -112,10 +112,10 @@ class Tokenizer
 					$source = ltrim($tail);
 					break;
 				case $source{0} === ')':
-					return [
+					return array(
 						($op === 'OR') ? new CondOr($res) : new CondAnd($res),
 						ltrim(substr($source, 1))
-					];
+					);
 				case substr($source, 0, 3) === 'AND':
 					if ($op == 'OR') {
 						throw new InvalidArgumentException("Unconsistenci operators. Must be only one type of op (OR or AND) with in one brackets pair.");
@@ -165,13 +165,13 @@ class Tokenizer
 				}
 				$x = $xs[$this->index];
 				$this->index++;
-				return [self::buildArgs('!bind', $x), substr($source, 1)];
+				return array(self::buildArgs('!bind', $x), substr($source, 1));
 			// bind to value (named)
 			case $source{0} == '%':
 				$i = strpos($source, '}');
 				$key = substr($source, 2, $i-2);
 				$x = $this->binds[$key];
-				return [self::buildArgs('!bind', $x), substr($source, $i + 1)];
+				return array(self::buildArgs('!bind', $x), substr($source, $i + 1));
 			case $source{0} == '(':
 				return self::parseTuple(substr(ltrim($source), 1), ')');
 			case $source{0} == '[':
@@ -181,12 +181,12 @@ class Tokenizer
 				return self::parseText(substr($source, 1), '"');
 			// numeric
 			case preg_match('~^(\d+)(.*)~s', $source, $matches):
-				return [self::buildArgs('numeric', $matches[1]), $matches[2]];
+				return array(self::buildArgs('numeric', $matches[1]), $matches[2]);
 			// bool
 			case strtolower(substr($source, 0, 4)) == 'true':
-				return [self::buildArgs('bool', true), substr($source, 4)];
+				return array(self::buildArgs('bool', true), substr($source, 4));
 			case strtolower(substr($source, 0, 5)) == 'false':
-				return [self::buildArgs('bool', false), substr($source, 5)];
+				return array(self::buildArgs('bool', false), substr($source, 5));
 			default:
 				throw new InvalidArgumentException("Unsuported args: `{$source}'.");
 		}
@@ -203,7 +203,7 @@ class Tokenizer
 		// @TODO Escapování
 		// ...
 		$i = strpos($str, $quote);
-		return [self::buildArgs('string', substr($str, 0, $i)), substr($str, $i + 1) ?: ''];
+		return array(self::buildArgs('string', substr($str, 0, $i)), substr($str, $i + 1) ?: '');
 	}
 
 
@@ -221,10 +221,10 @@ class Tokenizer
 		// @TODO Zanoření
 		// ...
 		$i = strpos($str, $bracket);
-		return [
+		return array(
 			self::buildArgs('tuple', array_map('trim', explode($delimiter, substr($str, 0, $i)))),
 			substr($str, $i + 1) ?: ''
-		];
+		);
 	}
 
 
@@ -267,7 +267,7 @@ class Tokenizer
 
 	private static function buildArgs($type, $val)
 	{
-		return ['type' => $type, 'val' => $val];
+		return array('type' => $type, 'val' => $val);
 	}
 
 
