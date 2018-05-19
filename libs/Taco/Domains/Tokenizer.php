@@ -198,12 +198,19 @@ class Tokenizer
 	{
 		// Prázdný řetězec.
 		if ($str{0} == $quote) {
-			return '';
+			//~ return '';
+			return array(
+				self::buildArgs('string', ''),
+				substr($str, 1) ?: ''
+			);
 		}
 		// @TODO Escapování
 		// ...
 		$i = strpos($str, $quote);
-		return array(self::buildArgs('string', substr($str, 0, $i)), substr($str, $i + 1) ?: '');
+		return array(
+			self::buildArgs('string', substr($str, 0, $i)),
+			substr($str, $i + 1) ?: ''
+		);
 	}
 
 
