@@ -190,4 +190,22 @@ class CondTest extends PHPUnit_Framework_TestCase
 	}
 
 
+
+	function testIterableMany()
+	{
+		$a = new CondOr([]);
+		$a->add(new ExprIs('i', 5));
+		$a->add(new ExprIs('i', 19));
+		$a->add(new ExprIs('i', 8));
+
+		$xs = [];
+		foreach ($a as $expr) {
+			$xs[] = $expr;
+		}
+		$this->assertEquals(new ExprIs('i', 5), $xs[0]);
+		$this->assertEquals(new ExprIs('i', 19), $xs[1]);
+		$this->assertEquals(new ExprIs('i', 8), $xs[2]);
+	}
+
+
 }

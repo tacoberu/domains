@@ -6,7 +6,7 @@
 
 namespace Taco\Domains;
 
-use ArrayAccess;
+use ArrayAccess, IteratorAggregate, ArrayIterator;
 
 
 /**
@@ -16,7 +16,7 @@ use ArrayAccess;
  *
  * @author Martin Takáč <martin@takac.name>
  */
-abstract class Cond implements IExpr, ArrayAccess
+abstract class Cond implements IExpr, ArrayAccess, IteratorAggregate
 {
 
 	const TYPE_AND = 'AND';
@@ -36,6 +36,13 @@ abstract class Cond implements IExpr, ArrayAccess
 	function expresions()
 	{
 		return $this->list;
+	}
+
+
+
+	function getIterator()
+	{
+		return new ArrayIterator($this->list);
 	}
 
 
