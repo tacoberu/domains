@@ -93,7 +93,8 @@ abstract class Expr implements IExpr
 	 */
 	function __toString()
 	{
-		return "{$this->prop()} {$this->type()} {$this->value()}";
+		$val = self::formatValue($this->value());
+		return "{$this->prop()} {$this->type()} {$val}";
 	}
 
 
@@ -144,6 +145,33 @@ abstract class Expr implements IExpr
 	static function notlike($prop, $text)
 	{
 		return new ExprNotLike($prop, $text);
+	}
+
+
+
+	/**
+	 * @return string
+	 */
+	private static function formatValue($val)
+	{
+		if ($val === Null) {
+			return 'Null';
+		}
+		if ($val === True) {
+			return 'True';
+		}
+		if ($val === False) {
+			return 'False';
+		}
+		if ($val === '') {
+			return '""';
+		}
+		if (is_string($val)) {
+			$val = var_export($val, True);
+			$val = trim($val, '\'');
+			return "\"{$val}\"";
+		}
+		return var_export($val, True);
 	}
 
 }

@@ -109,7 +109,59 @@ class CondTest extends PHPUnit_Framework_TestCase
 		$c->add($a);
 		$c->add($b);
 		$c->add(new ExprIs('x', 'abc'));
-		$this->assertEquals('((i = 5 OR i = 19) AND (a = 5 OR b = 19) AND x = abc)', (string)$c);
+		$this->assertEquals('((i = 5 OR i = 19) AND (a = 5 OR b = 19) AND x = "abc")', (string)$c);
+	}
+
+
+
+	function testAndSingleEmptyVal()
+	{
+		$a = new CondAnd([]);
+		$a->add(new ExprIs('name', ''));
+		$this->assertEquals('AND', $a->type());
+		$this->assertEquals([
+			new ExprIs('name', ''),
+		], $a->expresions());
+		$this->assertEquals('(name = "")', (string)$a);
+	}
+
+
+
+	function testAndSingleNullVal()
+	{
+		$a = new CondAnd([]);
+		$a->add(new ExprIs('name', Null));
+		$this->assertEquals('AND', $a->type());
+		$this->assertEquals([
+			new ExprIs('name', Null),
+		], $a->expresions());
+		$this->assertEquals('(name = Null)', (string)$a);
+	}
+
+
+
+	function testAndSingleBoolTrueVal()
+	{
+		$a = new CondAnd([]);
+		$a->add(new ExprIs('name', True));
+		$this->assertEquals('AND', $a->type());
+		$this->assertEquals([
+			new ExprIs('name', True),
+		], $a->expresions());
+		$this->assertEquals('(name = True)', (string)$a);
+	}
+
+
+
+	function testAndSingleBoolFalseVal()
+	{
+		$a = new CondAnd([]);
+		$a->add(new ExprIs('name', False));
+		$this->assertEquals('AND', $a->type());
+		$this->assertEquals([
+			new ExprIs('name', False),
+		], $a->expresions());
+		$this->assertEquals('(name = False)', (string)$a);
 	}
 
 }
