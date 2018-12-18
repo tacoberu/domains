@@ -164,4 +164,30 @@ class CondTest extends PHPUnit_Framework_TestCase
 		$this->assertEquals('(name = False)', (string)$a);
 	}
 
+
+
+	function testArrayAccess()
+	{
+		$a = new CondAnd([]);
+		$a->add(new ExprIs('name', 'Tim'));
+		$this->assertEquals('AND', $a->type());
+		$this->assertEquals(new ExprIs('name', 'Tim'), $a[0]);
+	}
+
+
+
+	function testArrayAccessMany()
+	{
+		$a = new CondOr([]);
+		$a->add(new ExprIs('i', 5));
+		$a->add(new ExprIs('i', 19));
+		$a->add(new ExprIs('i', 8));
+		$this->assertEquals('OR', $a->type());
+		$this->assertEquals('(i = 5 OR i = 19 OR i = 8)', (string)$a);
+		$this->assertEquals(new ExprIs('i', 5), $a[0]);
+		$this->assertEquals(new ExprIs('i', 19), $a[1]);
+		$this->assertEquals(new ExprIs('i', 8), $a[2]);
+	}
+
+
 }

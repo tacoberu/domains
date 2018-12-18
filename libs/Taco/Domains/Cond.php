@@ -6,6 +6,8 @@
 
 namespace Taco\Domains;
 
+use ArrayAccess;
+
 
 /**
  * Condition - podmínka. Podmínka existuje sama o sobě. Je ji možné použít
@@ -14,7 +16,7 @@ namespace Taco\Domains;
  *
  * @author Martin Takáč <martin@takac.name>
  */
-abstract class Cond implements IExpr
+abstract class Cond implements IExpr, ArrayAccess
 {
 
 	const TYPE_AND = 'AND';
@@ -58,6 +60,34 @@ abstract class Cond implements IExpr
 			return '';
 		}
 		return '(' . implode(' ' . $this->type() . ' ', $this->expresions()) . ')';
+	}
+
+
+
+	function offsetExists($offset)
+	{
+		return isset($this->list[$offset]);
+	}
+
+
+
+	function  offsetGet($offset)
+	{
+		return isset($this->list[$offset]) ? $this->list[$offset] : Null;
+	}
+
+
+
+	function  offsetSet($offset, $value)
+	{
+		throw new LogicException('Overwrite is not supported. Use the add method.');
+	}
+
+
+
+	function  offsetUnset($offset)
+	{
+		throw new LogicException('Unset is not supported.');
 	}
 
 }
