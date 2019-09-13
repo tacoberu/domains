@@ -13,38 +13,40 @@ use InvalidArgumentException;
 class TokenizerTest extends PHPUnit_Framework_TestCase
 {
 
-	function testParseExprNull()
+	/**
+	 * @dataProvider dataEmptyValues
+	 */
+	function testParseExprEmpty($expr)
 	{
 		$this->setExpectedException(InvalidArgumentException::class, 'Empty expression.');
 		$tok = new Tokenizer();
-		$tok->parseExpr(null);
+		$tok->parseExpr($expr);
 	}
 
 
 
-	function testParseExprEmptyString()
+	/**
+	 * @dataProvider dataEmptyValues
+	 */
+	function testParseCondsEmpty($expr)
 	{
 		$this->setExpectedException(InvalidArgumentException::class, 'Empty expression.');
 		$tok = new Tokenizer();
-		$tok->parseExpr('');
+		$tok->parseConds($expr);
 	}
 
 
 
-	function testParseCondsNull()
+	function dataEmptyValues()
 	{
-		$this->setExpectedException(InvalidArgumentException::class, 'Empty expression.');
-		$tok = new Tokenizer();
-		$tok->parseConds(null);
-	}
-
-
-
-	function testParseCondsEmptyString()
-	{
-		$this->setExpectedException(InvalidArgumentException::class, 'Empty expression.');
-		$tok = new Tokenizer();
-		$tok->parseConds('');
+		return [
+			[Null],
+			[''],
+			//~ [' '],
+			[0],
+			//~ [True],
+			[False],
+		];
 	}
 
 
@@ -65,25 +67,45 @@ class TokenizerTest extends PHPUnit_Framework_TestCase
 	function providerParseExpr()
 	{
 		return [
-			'is' =>
+			'is int' =>
 				[ 'a = 1.'
 				, '.'
 				, new ExprIs('a', 1)
 				],
-			'is 1' =>
+			'is int 1' =>
 				[ 'in = 18'
 				, ''
 				, new ExprIs('in', 18)
 				],
-			'is 2' =>
+			'is int 2' =>
 				[ 'IN = 18'
 				, ''
 				, new ExprIs('IN', 18)
 				],
-			'is 3' =>
+			'is string 1' =>
 				[ 'atr =  "abc"'
 				, ''
 				, new ExprIs('atr', 'abc')
+				],
+			'is string 2' =>
+				[ 'atr =  "a\'bc"'
+				, ''
+				, new ExprIs('atr', 'a\'bc')
+				],
+			'is string 3' =>
+				[ "atr =  \"a\nbc\""
+				, ''
+				, new ExprIs('atr', 'a' . PHP_EOL . 'bc')
+				],
+/*			'is string 4' =>
+				[ 'atr =  \'abc\''
+				, ''
+				, new ExprIs('atr', 'abc')
+				],*/
+			'is string 5' =>
+				[ 'a = "/"'
+				, ''
+				, new ExprIs('a', '/')
 				],
 			'is false' =>
 				[ 'a = false'
@@ -291,6 +313,52 @@ class TokenizerTest extends PHPUnit_Framework_TestCase
 	function providerParseConds()
 	{
 		return [
+			'is int' =>
+				[ '(a = 1).'
+				, '.'
+				, new CondAnd( [ new ExprIs('a', 1) ] )
+				],
+			'is int 1' =>
+				[ '(in = 18)'
+				, ''
+				, new CondAnd( [ new ExprIs('in', 18) ] )
+				],
+			'is int 2' =>
+				[ '(IN = 18)'
+				, ''
+				, new CondAnd( [ new ExprIs('IN', 18) ] )
+				],
+			'is string 1' =>
+				[ '(atr =  "abc")'
+				, ''
+				, new CondAnd( [ new ExprIs('atr', 'abc') ] )
+				],
+			'is string 2' =>
+				[ '(atr =  "a\'bc")'
+				, ''
+				, new CondAnd( [ new ExprIs('atr', 'a\'bc') ] )
+				],
+			'is string 3' =>
+				[ "(atr =  \"a\nbc\")"
+				, ''
+				, new CondAnd( [ new ExprIs('atr', 'a' . PHP_EOL . 'bc') ] )
+				],
+/*			'is string 4' =>
+				[ '(atr =  \'abc\')'
+				, ''
+				, new CondAnd( [ new ExprIs('atr', 'abc') ] )
+				],*/
+			'is string 5' =>
+				[ '(a = "/")'
+				, ''
+				, new CondAnd( [ new ExprIs('a', '/') ] )
+				],
+			'is string 6' =>
+				[ '(a LIKE "abc%")'
+				, ''
+				, new CondAnd( [ new ExprLike('a', 'abc%') ] )
+				],
+
 			'bracket' =>
 				[ '(key != "slug").'
 				, '.'
