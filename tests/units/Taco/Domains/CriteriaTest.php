@@ -214,4 +214,74 @@ class CriteriaTest extends PHPUnit_Framework_TestCase
 		$a->where('count', 6);
 	}
 
+
+
+
+	function testCriteriaFromExample1()
+	{
+		$inst = Criteria::range('IO/File', 20)
+			->with('fileInfo')
+			->with('content')
+			->where('fileInfo.size <', 400)
+			->where('fileInfo.size >', 400000);
+		$this->assertEquals('IO/File', $inst->getTypeName());
+		$this->assertEquals(20, $inst->getLimit());
+		$this->assertEquals(0, $inst->getOffset());
+		$this->assertEquals(array('fileInfo', 'content'), $inst->getWith());
+		$this->assertEquals(array(), $inst->getOrderBy());
+		$this->assertEquals('(fileInfo = 400 AND fileInfo = 400000)', (string) $inst->getWhere());
+	}
+
+
+
+
+	function testCriteriaFromExample2()
+	{
+		$inst = Criteria::range('Article', 20)
+				->with('fileInfo')
+				->with('content')
+				->where('fileInfo.size <', 400)
+				->orderByDesc('fileInfo.size');
+		$this->assertEquals('Article', $inst->getTypeName());
+		$this->assertEquals(20, $inst->getLimit());
+		$this->assertEquals(0, $inst->getOffset());
+		$this->assertEquals(array('fileInfo', 'content'), $inst->getWith());
+		$this->assertEquals(array('fileInfo.size' => 'DESC'), $inst->getOrderBy());
+		$this->assertEquals('(fileInfo = 400)', (string) $inst->getWhere());
+	}
+
+
+
+
+	function _testCriteriaFromExample3()
+	{
+		$inst = Criteria::count('Article')
+				->with('fileInfo')
+				->with('content')
+				->where('fileInfo.size <', 400);
+		$this->assertEquals('Article', $inst->getTypeName());
+		$this->assertNull($inst->getLimit());
+		$this->assertNull($inst->getOffset());
+		$this->assertEquals(array('fileInfo', 'content'), $inst->getWith());
+		$this->assertEquals(array(), $inst->getOrderBy());
+		$this->assertEquals('(fileInfo = 400)', (string) $inst->getWhere());
+	}
+
+
+
+
+	function testCriteriaFromExample4()
+	{
+		$inst = Criteria::first('Article')
+				->with('fileInfo')
+				->with('content')
+				->where('fileInfo.size <', 400);
+		$this->assertEquals('Article', $inst->getTypeName());
+		$this->assertEquals(1, $inst->getLimit());
+		$this->assertEquals(0, $inst->getOffset());
+		$this->assertEquals(array('fileInfo', 'content'), $inst->getWith());
+		$this->assertEquals(array(), $inst->getOrderBy());
+		$this->assertEquals('(fileInfo = 400)', (string) $inst->getWhere());
+	}
+
 }

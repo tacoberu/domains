@@ -79,6 +79,22 @@ class Criteria
 
 
 
+	static function first($type)
+	{
+		return self::create($type)
+				->limit(1)
+				->offset(0);
+	}
+
+
+
+	static function count($type)
+	{
+		return new Aggregations\Count(self::create($type));
+	}
+
+
+
 	/**
 	 * @param Object|string.
 	 */
