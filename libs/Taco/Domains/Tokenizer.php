@@ -106,12 +106,12 @@ class Tokenizer
 		$op = null;
 		while(true) {
 			switch (true) {
-				case $source{0} === '(':
+				case $source[0] === '(':
 					list($expr, $tail) = $this->parseExpr(substr($source, 1));
 					$res[] = $expr;
 					$source = ltrim($tail);
 					break;
-				case $source{0} === ')':
+				case $source[0] === ')':
 					return array(
 						($op === 'OR') ? new CondOr($res) : new CondAnd($res),
 						ltrim(substr($source, 1))
@@ -122,7 +122,7 @@ class Tokenizer
 					}
 					$op = 'AND';
 					$source = ltrim(substr($source, 3));
-					if ($source{0} === '(') {
+					if ($source[0] === '(') {
 						list($expr, $tail) = $this->parseConds($source);
 						$res[] = $expr;
 						$source = (string)$tail;
@@ -137,7 +137,7 @@ class Tokenizer
 					}
 					$op = 'OR';
 					$source = ltrim(substr($source, 2));
-					if ($source{0} === '(') {
+					if ($source[0] === '(') {
 						list($expr, $tail) = $this->parseConds($source);
 						$res[] = $expr;
 						$source = (string)$tail;
@@ -158,7 +158,7 @@ class Tokenizer
 	{
 		switch (true) {
 			// bind to value
-			case $source{0} == '?':
+			case $source[0] == '?':
 				$xs = array_values($this->binds);
 				if ( ! array_key_exists($this->index, $xs)) {
 					throw new InvalidArgumentException("Unexcepted bound of arguments. Require {$this->index}s index.");
@@ -167,17 +167,17 @@ class Tokenizer
 				$this->index++;
 				return array(self::buildArgs('!bind', $x), substr($source, 1));
 			// bind to value (named)
-			case $source{0} == '%':
+			case $source[0] == '%':
 				$i = strpos($source, '}');
 				$key = substr($source, 2, $i-2);
 				$x = $this->binds[$key];
 				return array(self::buildArgs('!bind', $x), substr($source, $i + 1));
-			case $source{0} == '(':
+			case $source[0] == '(':
 				return self::parseTuple(substr(ltrim($source), 1), ')');
-			case $source{0} == '[':
+			case $source[0] == '[':
 				return self::parseTuple(substr(ltrim($source), 1), ']');
 			// string
-			case $source{0} == '"':
+			case $source[0] == '"':
 				return self::parseText(substr($source, 1), '"');
 			// numeric
 			case preg_match('~^(\d+)(.*)~s', $source, $matches):
@@ -197,7 +197,7 @@ class Tokenizer
 	private static function parseText($str, $quote)
 	{
 		// Prázdný řetězec.
-		if ($str{0} == $quote) {
+		if ($str[0] == $quote) {
 			//~ return '';
 			return array(
 				self::buildArgs('string', ''),
@@ -221,7 +221,7 @@ class Tokenizer
 	private static function parseTuple($str, $bracket, $delimiter = ',')
 	{
 		// Prázdný řetězec.
-		if ($str{0} == $bracket) {
+		if ($str[0] == $bracket) {
 			return '';
 		}
 		// @TODO Escapování
