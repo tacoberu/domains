@@ -573,3 +573,18 @@ class ExprNot extends Expr
 	}
 
 }
+
+
+
+class ExprInSubquery extends Expr
+{
+
+	/**
+	 * @return string
+	 */
+	function type()
+	{
+		return 'in';
+	}
+
+}
