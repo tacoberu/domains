@@ -19,31 +19,41 @@ class Criteria
 
 	/**
 	 * Jmeno prvku. Bud je to string, nebo instance.
+	 * @var mixed
+	 */
+	private $what;
+
+
+	/**
+	 * @var array
 	 */
 	private $with = array();
 
 
 	/**
 	 * Podmínka je v podobě stromu. Kořenem bývá nejčastěji AND
-	 * @var Cond
+	 * @var Filter
 	 */
-	private $filter = array();
+	private $filter;
 
 
 	/**
 	 * Setrideno.
+	 * @var array<string, 'ASC'|'DESC'>
 	 */
 	private $orderBy = array();
 
 
 	/**
 	 * Posunutí.
+	 * @var int|Null
 	 */
 	private $offset = NULL;
 
 
 	/**
 	 * Omezení počtu.
+	 * @var int|Null
 	 */
 	private $limit = NULL;
 
@@ -56,7 +66,8 @@ class Criteria
 
 
 	/**
-	 * @param Object|string
+	 * @param object|string $type
+	 * @return self
 	 */
 	static function create($type)
 	{
@@ -66,9 +77,10 @@ class Criteria
 
 
 	/**
-	 * @param Object|string
-	 * @param int
-	 * @param int
+	 * @param object|string $type
+	 * @param int $limit
+	 * @param int $offset
+	 * @return self
 	 */
 	static function range($type, $limit = 40, $offset = 0)
 	{
@@ -79,6 +91,10 @@ class Criteria
 
 
 
+	/**
+	 * @param object|string $type
+	 * @return self
+	 */
 	static function first($type)
 	{
 		return self::create($type)
@@ -88,6 +104,10 @@ class Criteria
 
 
 
+	/**
+	 * @param object|string $type
+	 * @return Aggregations\Count
+	 */
 	static function count($type)
 	{
 		return new Aggregations\Count(self::create($type));
@@ -96,7 +116,7 @@ class Criteria
 
 
 	/**
-	 * @param Object|string.
+	 * @param object|string $type
 	 */
 	function __construct($type)
 	{
@@ -115,9 +135,9 @@ class Criteria
 
 
 	/**
-	 * @params string
+	 * @params string $name
 	 *
-	 * @return Criteria
+	 * @return self
 	 */
 	function what($name)
 	{
@@ -131,16 +151,17 @@ class Criteria
 	/**
 	 * Zvoli, ktere sloupce chcem.
 	 *
-	 * @example:
+	 * example:
 	 * $model->with('id')    // Chceme sloupecek id
 	 *  ->with('*')          // Vsechny prvky, bez asociaci
 	 *  ->with('title')      // Chceme title
 	 *  ->with('discuss.id') // Chceme hodnoty asociace discus, ale z ni jen id
 	 *  ->with('vote.*')     // Chceme vsechny hodnoty asociace vote
 	 *
-	 * @params string
+	 * @params string $name
+	 * @params string $filter
 	 *
-	 * @return Criteria
+	 * @return self
 	 */
 	function with($name, $filter = Null)
 	{
@@ -175,14 +196,14 @@ class Criteria
 
 	/**
 	 * Nastavi podminku do Criteria
-	 * @param mixed
-	 * @example
+	 * @param mixed $expression
+	 * example
 	 * $criteria->where('code LIKE', $code);
 	 * $criteria->where(new ExprLike('code', $code));
 	 *
-	 * @return ICriteria
+	 * @return self
 	 */
-	function where($expresion)
+	function where($expression)
 	{
 		$args = func_get_args();
 		call_user_func_array([$this->filter, 'where'], $args);
@@ -195,14 +216,14 @@ class Criteria
 	/**
 	 * Razeni.
 	 *
-	 * @example:
-	 * $model->sort('id')
-	 *  ->sort('title DESC')
-	 *  ->sort('title = "cs"')
+	 * example:
+	 * $model->sororderByAsct('id')
+	 *  ->orderByAsc('title')
+	 *  ->orderByAsc('title = "cs"')
 	 *
-	 * @params string
+	 * @params string $by
 	 *
-	 * @return Criteria
+	 * @return self
 	 */
 	function orderByAsc($by)
 	{
@@ -217,13 +238,13 @@ class Criteria
 	 * Razeni.
 	 *
 	 * @example:
-	 * $model->sort('id')
-	 *  ->sort('title DESC')
-	 *  ->sort('title = "cs"')
+	 * $model->orderByDesc('id')
+	 *  ->orderByDesc('title')
+	 *  ->orderByDesc('title = "cs"')
 	 *
-	 * @params string
+	 * @params string $by
 	 *
-	 * @return Criteria
+	 * @return self
 	 */
 	function orderByDesc($by)
 	{
@@ -249,7 +270,7 @@ class Criteria
 
 	/**
 	 * Omezit počet.
-	 * @param  int   Počet záznamů.
+	 * @param  int $value Počet záznamů.
 	 * @return self
 	 */
 	function limit($value)
@@ -263,7 +284,7 @@ class Criteria
 
 	/**
 	 * Posunout na offset.
-	 * @param  int   Posun o.
+	 * @param  int $value Posun o.
 	 * @return self
 	 */
 	function offset($value)
@@ -280,7 +301,7 @@ class Criteria
 
 
 	/**
-	 * Seznam sloupců.
+	 * @return string
 	 */
 	function getTypeName()
 	{
@@ -290,7 +311,7 @@ class Criteria
 
 
 	/**
-	 * Seznam sloupců.
+	 * @return array<mixed>
 	 */
 	function getWith()
 	{
@@ -312,6 +333,7 @@ class Criteria
 
 	/**
 	 * Seznam řazení.
+	 * @return array<string, 'ASC'|'DESC'>
 	 */
 	function getOrderBy()
 	{
@@ -348,7 +370,7 @@ class Criteria
 
 	/**
 	 * Makes the object unmodifiable.
-	 * @return void
+	 * @return self
 	 */
 	function freeze()
 	{

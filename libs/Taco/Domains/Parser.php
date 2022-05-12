@@ -22,7 +22,7 @@ class Parser
 	 *
 	 * @param string $expr Like '[id = ?]'
 	 * @param array $args Values for ? in $expr.
-	 * @return Filter
+	 * @return Filter|Null
 	 */
 	static function parseFilter($expr, array $args = [])
 	{
@@ -31,17 +31,21 @@ class Parser
 			$whereexpr = substr(trim(substr($expr, 7)), 1, -1);
 			return new Filter(substr($expr, 0, 7), self::parseWhere($whereexpr));
 		}
+		return Null;
 	}
 
 
 
 	/**
 	 * Nastavi podminku do Criteria
-	 * @param mixed
-	 * @example
-	 * $criteria->parseWhere(['code LIKE', $code]);
+	 * @param string $expr
+	 * @param array<mixed> $args
+	 * example
+	 * 	$criteria->parseWhere('code LIKE', ['code']);
+	 * 	$criteria->parseWhere('id =', [5]);
+	 * 	$criteria->parseWhere('id = ?', [5]);
 	 *
-	 * @return [ Expr ]
+	 * @return IExpr
 	 */
 	static function parseWhere($expr, array $args = [])
 	{
@@ -49,7 +53,7 @@ class Parser
 			throw new InvalidArgumentException("Empty where-conds.");
 		}
 		$tok = new Tokenizer($args);
-		if ($expr{0} === '(') {
+		if ($expr[0] === '(') {
 			list($expr, $tail) = $tok->parseConds($expr);
 		}
 		else {
@@ -59,6 +63,7 @@ class Parser
 		if ($tail) {
 			throw new InvalidArgumentException("Unsuported where-conds: `{$tail}'.");
 		}
+
 		return $expr;
 	}
 

@@ -43,6 +43,7 @@ abstract class Expr implements IExpr
 
 	/**
 	 * Levá strana výrazu.
+	 * @var string
 	 */
 	private $prop;
 
@@ -50,14 +51,14 @@ abstract class Expr implements IExpr
 
 	/**
 	 * Pravá strana výrazu.
+	 * @var mixed
 	 */
 	private $value;
 
 
 	/**
-	 * @param string
-	 * @param mixin
-	 * @param mixin
+	 * @param string|null $prop
+	 * @param mixed $value
 	 */
 	function __construct($prop, $value)
 	{
@@ -79,7 +80,7 @@ abstract class Expr implements IExpr
 
 
 	/**
-	 * @return mixin
+	 * @return mixed
 	 */
 	function value()
 	{
@@ -101,6 +102,8 @@ abstract class Expr implements IExpr
 
 	/**
 	 * Podmínka jsoucnosti: id = 1
+	 * @param string $prop
+	 * @param mixed $value
 	 */
 	static function is($prop, $value)
 	{
@@ -111,6 +114,8 @@ abstract class Expr implements IExpr
 
 	/**
 	 * Podmínka jsoucnosti: id IN(1,3,5)
+	 * @param string $prop
+	 * @param array<mixed> $values
 	 */
 	static function in($prop, array $values)
 	{
@@ -121,6 +126,8 @@ abstract class Expr implements IExpr
 
 	/**
 	 * Podmínka jsoucnosti: id NOTIN(1,3,5)
+	 * @param string $prop
+	 * @param array<mixed> $values
 	 */
 	static function notin($prop, array $values)
 	{
@@ -131,6 +138,8 @@ abstract class Expr implements IExpr
 
 	/**
 	 * Podmínka jsoucnosti: title LIKE 'ahoj'
+	 * @param string $prop
+	 * @param mixed $text
 	 */
 	static function like($prop, $text)
 	{
@@ -141,6 +150,8 @@ abstract class Expr implements IExpr
 
 	/**
 	 * Podmínka jsoucnosti: title NOTLIKE 'ahoj'
+	 * @param string $prop
+	 * @param mixed $text
 	 */
 	static function notlike($prop, $text)
 	{
@@ -150,6 +161,7 @@ abstract class Expr implements IExpr
 
 
 	/**
+	 * @param mixed $val
 	 * @return string
 	 */
 	private static function formatValue($val)
@@ -209,7 +221,7 @@ class ExprThisIsEquals extends Expr
 
 
 	/**
-	 * @param Objekt.
+	 * @param mixed $rgt
 	 */
 	function __construct($rgt)
 	{
@@ -329,7 +341,7 @@ class ExprIsNull extends Expr
 
 
 	/**
-	 * @param Objekt.
+	 * @param string $lft
 	 */
 	function __construct($lft)
 	{
@@ -358,7 +370,7 @@ class ExprIsNotNull extends Expr
 
 
 	/**
-	 * @param Objekt.
+	 * @param string $lft
 	 */
 	function __construct($lft)
 	{
@@ -386,7 +398,8 @@ class ExprIn extends Expr
 {
 
 	/**
-	 * @param Objekt.
+	 * @param string $lft
+	 * @param array<mixed> $rgt
 	 */
 	function __construct($lft, array $rgt)
 	{
@@ -406,7 +419,7 @@ class ExprIn extends Expr
 
 
 	/**
-	 * Hodnota
+	 * @return array<mixed>
 	 */
 	function value()
 	{
@@ -415,9 +428,6 @@ class ExprIn extends Expr
 
 
 
-	/**
-	 * Podmínka jsoucnosti: id = 1
-	 */
 	function __toString()
 	{
 		$values = implode(', ', $this->value());
@@ -434,6 +444,10 @@ class ExprIn extends Expr
 class ExprNotIn extends Expr
 {
 
+	/**
+	 * @param string $lft
+	 * @param array<mixed> $rgt
+	 */
 	function __construct($lft, array $rgt)
 	{
 		parent::__construct($lft, $rgt);
@@ -451,6 +465,9 @@ class ExprNotIn extends Expr
 
 
 
+	/**
+	 * @return array<mixed>
+	 */
 	function value()
 	{
 		return (array)parent::value();
@@ -469,20 +486,10 @@ class ExprNotIn extends Expr
 
 
 /**
- * Odpovídá pasce.
+ * Odpovídá masce.
  */
 class ExprLike extends Expr
 {
-
-
-	/**
-	 * @param Objekt.
-	 */
-	function __construct($lft, $rgt)
-	{
-		parent::__construct($lft, $rgt);
-	}
-
 
 
 	/**
@@ -495,9 +502,6 @@ class ExprLike extends Expr
 
 
 
-	/**
-	 * Podmínka jsoucnosti: id = 1
-	 */
 	function __toString()
 	{
 		return "{$this->prop()} {$this->type()} '{$this->value()}'";
@@ -515,16 +519,6 @@ class ExprNotLike extends Expr
 
 
 	/**
-	 * @param Objekt.
-	 */
-	function __construct($lft, $rgt)
-	{
-		parent::__construct($lft, $rgt);
-	}
-
-
-
-	/**
 	 * @return string
 	 */
 	function type()
@@ -534,9 +528,6 @@ class ExprNotLike extends Expr
 
 
 
-	/**
-	 * Podmínka jsoucnosti: id = 1
-	 */
 	function __toString()
 	{
 		return "{$this->prop()} {$this->type()} '{$this->value()}'";
@@ -553,7 +544,7 @@ class ExprNot extends Expr
 {
 
 	/**
-	 * @param Objekt.
+	 * @param mixed $lft
 	 */
 	function __construct($lft)
 	{

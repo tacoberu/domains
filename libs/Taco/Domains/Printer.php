@@ -100,7 +100,7 @@ class Printer
 			case $expr instanceof ExprIsNotNull:
 				return "{$expr->prop()} {$expr->type()}";
 			default:
-				throw new LogicException("Unsupported `" . get_class($expr) . "' in expresion: `{$expr}'.");
+				throw new LogicException("Unsupported `" . get_class($expr) . "'.");
 		}
 	}
 
@@ -136,7 +136,6 @@ class Printer
 			default:
 				throw new LogicException("Unsupported type of value:`" . gettype($val) . "'.");
 		}
-		return $criteria->getWith();
 	}
 
 }

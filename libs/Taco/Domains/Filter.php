@@ -21,15 +21,16 @@ class Filter implements Filterable
 
 	/**
 	 * Typ požadovaného prvku.
+	 * @var string
 	 */
 	private $typeName;
 
 
 	/**
 	 * Podmínka je v podobě stromu. Kořenem bývá defaultně AND.
-	 * @var Cond
+	 * @var Cond|Null
 	 */
-	private $filter = Null;
+	private $condition = Null;
 
 
 	/**
@@ -41,7 +42,7 @@ class Filter implements Filterable
 
 
 	/**
-	 * @param string.
+	 * @param string|object $type
 	 */
 	function __construct($type, Cond $cond = null)
 	{
@@ -54,14 +55,14 @@ class Filter implements Filterable
 		}
 
 		$this->typeName = $type;
-		$this->filter = $cond;
+		$this->condition = $cond;
 	}
 
 
 
 	/**
-	 * @param mixed
-	 * @example
+	 * @param mixed $expresion
+	 * example
 	 *   $criteria->where('code', $code);
 	 *   $criteria->where('code =', $code);
 	 *   $criteria->where('code LIKE', $code);
@@ -72,9 +73,10 @@ class Filter implements Filterable
 	function where($expresion)
 	{
 		$args = func_get_args();
+		$acum = array();
 
 		// Začátek může obsahovat vysloveně instance. Ty nebude parsovat. Jako výraz následovaný argumenty může být až jako poslední.
-		while($expr = array_shift($args)) {
+		while ($expr = array_shift($args)) {
 			if ($expr instanceof IExpr) {
 				$acum[] = $expr;
 			}
@@ -86,16 +88,16 @@ class Filter implements Filterable
 
 		// Naplníme filtr
 		foreach ($acum as $expr) {
-			if (empty($this->filter)) {
+			if (empty($this->condition)) {
 				if ($expr instanceof Cond) {
-					$this->filter = $expr;
+					$this->condition = $expr;
 					continue;
 				}
 				else {
-					$this->filter = new CondAnd([]);
+					$this->condition = new CondAnd([]);
 				}
 			}
-			$this->filter->add($expr);
+			$this->condition->add($expr);
 		}
 
 		$this->updating();
@@ -106,6 +108,7 @@ class Filter implements Filterable
 
 	/**
 	 * Seznam sloupců.
+	 * @return string
 	 */
 	function getTypeName()
 	{
@@ -120,7 +123,7 @@ class Filter implements Filterable
 	 */
 	function getWhere()
 	{
-		return $this->filter;
+		return $this->condition;
 	}
 
 
@@ -131,7 +134,7 @@ class Filter implements Filterable
 
 	/**
 	 * Makes the object unmodifiable.
-	 * @return void
+	 * @return self
 	 */
 	function freeze()
 	{

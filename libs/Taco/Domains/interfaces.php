@@ -16,7 +16,7 @@ interface Filterable
 	/**
 	 * Zvoli omezení na sloupce.
 	 *
-	 * @example:
+	 * example:
 	 * $model->where('id = ?', "56")	//	Podle validace zkontroluje, ze tam ma byt int.
 	 *     ->where('id IS NOT NULL')
 	 *     ->where('title = ? OR title = ?', 'foo', 'boo')
@@ -24,7 +24,7 @@ interface Filterable
 	 *     ->where('vote.create BETWEEN ? AND ?', time(), time()+100)
 	 *     ->where('role IN (?)', array(1, 4, 6))
 	 *
-	 * @param more
+	 * @param mixed $args
 	 *
 	 * @return self
 	 */
@@ -32,7 +32,7 @@ interface Filterable
 
 
 	/**
-	 * @return array
+	 * @return Cond
 	 */
 	function getWhere();
 
@@ -49,13 +49,13 @@ interface Sortable
 	/**
 	 *	Řazení.
 	 *
-	 *	@example:
+	 *	@xample:
 	 *	$model->sort('key', DESC)
 	 *		->sort('title', DESC)
 	 *		->sort('title = "cs"', DESC)
 	 *
-	 *	@param string
-	 *	@param string
+	 *	@param string $by
+	 *	@param string $dir Only DESC or ASC
 	 *
 	 *	@return self
 	 */
@@ -64,7 +64,7 @@ interface Sortable
 
 	/**
 	 * Získání výsledků.
-	 * @return array of OrderItem
+	 * @return array<mixed>
 	 */
 	function getOrders();
 
@@ -80,7 +80,7 @@ interface Range extends Filterable, Sortable
 {
 
 	/**
-	 *	@param integer
+	 *	@param integer $value
 	 *
 	 *	@return self
 	 */
@@ -89,7 +89,7 @@ interface Range extends Filterable, Sortable
 
 
 	/**
-	 *	@param integer
+	 *	@param integer $value
 	 *
 	 *	@return self
 	 */
@@ -133,7 +133,7 @@ interface Changes
 
 	/**
 	 * Results
-	 * @return array
+	 * @return array<string, mixed>
 	 */
 	function changes();
 

@@ -35,8 +35,8 @@ class Tokenizer
 
 	/**
 	 * Expression is composing from modificator, object, operator and arguments.
-	 * @param  string "a = 1", "NOT b = 1", "b IN (1,2,3)"
-	 * @return [Expr, string]
+	 * @param string $source Like "a = 1", "NOT b = 1", "b IN (1,2,3)"
+	 * @return array<Expr|string> LIke [Expr, string]
 	 */
 	function parseExpr($source)
 	{
@@ -95,7 +95,7 @@ class Tokenizer
 	/**
 	 * Composition with bracket: "(a AND b OR (c AND e))"
 	 * @param string $source
-	 * @return [Cond, string]
+	 * @return array<Cond|string> Konkrétně [Cond, string]
 	 */
 	function parseConds($source)
 	{

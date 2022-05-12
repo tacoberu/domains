@@ -22,8 +22,14 @@ interface Aggregation
 class Count implements Aggregation
 {
 
+	private $lft;
+
+	/**
+	 * @param mixed $lft
+	 */
 	function __construct($lft)
 	{
+		$this->lft = $lft;
 	}
 
 }

@@ -6,7 +6,7 @@
 
 namespace Taco\Domains;
 
-use ArrayAccess, IteratorAggregate, ArrayIterator;
+use ArrayAccess, IteratorAggregate, ArrayIterator, LogicException;
 
 
 /**
@@ -78,21 +78,21 @@ abstract class Cond implements IExpr, ArrayAccess, IteratorAggregate
 
 
 
-	function  offsetGet($offset)
+	function offsetGet($offset)
 	{
 		return isset($this->list[$offset]) ? $this->list[$offset] : Null;
 	}
 
 
 
-	function  offsetSet($offset, $value)
+	function offsetSet($offset, $value)
 	{
 		throw new LogicException('Overwrite is not supported. Use the add method.');
 	}
 
 
 
-	function  offsetUnset($offset)
+	function offsetUnset($offset)
 	{
 		throw new LogicException('Unset is not supported.');
 	}
@@ -111,6 +111,7 @@ class CondOr extends Cond
 
 	/**
 	 * Podmínka jsoucnosti: (id = 1 OR id = 2 OR id = 5)
+	 * @param array<IExpr> $args
 	 */
 	function __construct(array $args)
 	{
@@ -121,6 +122,9 @@ class CondOr extends Cond
 
 
 
+	/**
+	 * @return string
+	 */
 	function type()
 	{
 		return self::TYPE_OR;
@@ -140,7 +144,7 @@ class CondAnd extends Cond
 
 	/**
 	 * Podmínka jsoucnosti: (id = 1 AND id = 2 AND id = 5)
-	 * @param Objekt.
+	 * @param array<IExpr> $args
 	 */
 	function __construct(array $args)
 	{
@@ -151,6 +155,9 @@ class CondAnd extends Cond
 
 
 
+	/**
+	 * @return string
+	 */
 	function type()
 	{
 		return self::TYPE_AND;
@@ -172,7 +179,6 @@ class _FuncNot extends Cond
 	/**
 	 * Negace: NOT (id = 1 AND id = 2 AND id = 5)
 	 * Negace: NOT (id = 1 AND id = 2 AND id = 5)
-	 * @param Objekt.
 	 */
 	function __construct()
 	{
@@ -183,6 +189,9 @@ class _FuncNot extends Cond
 
 
 
+	/**
+	 * @return string
+	 */
 	function type()
 	{
 		return self::TYPE_NOT;

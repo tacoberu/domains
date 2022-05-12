@@ -9,7 +9,8 @@
 		"tracy/tracy": "2.*",
 		"phpunit/phpunit": "~4.0",
 		"sstalle/php7cc": "^1.1",
-		"phpmd/phpmd": "^2.6"
+		"phpmd/phpmd": "^2.6",
+		"phpstan/phpstan": "^1.6"
 	},
 	"authors": [
 		{
