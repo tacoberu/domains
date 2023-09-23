@@ -40,6 +40,7 @@ abstract class Cond implements IExpr, ArrayAccess, IteratorAggregate
 
 
 
+	#[\ReturnTypeWillChange]
 	function getIterator()
 	{
 		return new ArrayIterator($this->list);
@@ -71,6 +72,7 @@ abstract class Cond implements IExpr, ArrayAccess, IteratorAggregate
 
 
 
+	#[\ReturnTypeWillChange]
 	function offsetExists($offset)
 	{
 		return isset($this->list[$offset]);
@@ -78,6 +80,7 @@ abstract class Cond implements IExpr, ArrayAccess, IteratorAggregate
 
 
 
+	#[\ReturnTypeWillChange]
 	function offsetGet($offset)
 	{
 		return isset($this->list[$offset]) ? $this->list[$offset] : Null;
@@ -85,6 +88,7 @@ abstract class Cond implements IExpr, ArrayAccess, IteratorAggregate
 
 
 
+	#[\ReturnTypeWillChange]
 	function offsetSet($offset, $value)
 	{
 		throw new LogicException('Overwrite is not supported. Use the add method.');
@@ -92,6 +96,7 @@ abstract class Cond implements IExpr, ArrayAccess, IteratorAggregate
 
 
 
+	#[\ReturnTypeWillChange]
 	function offsetUnset($offset)
 	{
 		throw new LogicException('Unset is not supported.');
