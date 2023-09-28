@@ -76,15 +76,15 @@ class Printer
 				foreach ($expr->expresions() as $expr2) {
 					$ops[] = self::formatWhere($expr2);
 				}
-
 				return '(' . implode(' AND ', $ops) . ')';
+
 			case $expr instanceof CondOr:
 				$ops = [];
 				foreach ($expr->expresions() as $expr2) {
 					$ops[] = self::formatWhere($expr2);
 				}
-
 				return '(' . implode(' OR ', $ops) . ')';
+
 			case $expr instanceof ExprIs:
 			case $expr instanceof ExprIsNot:
 			case $expr instanceof ExprGreaterThan:
@@ -125,6 +125,8 @@ class Printer
 	private static function escape($val)
 	{
 		switch(True) {
+			case is_null($val):
+				return 'null';
 			case is_bool($val):
 				return $val ? 'true' : 'false';
 			case is_numeric($val):
@@ -133,9 +135,21 @@ class Printer
 				return '"' . $val . '"';
 			case is_array($val):
 				return '[' . implode(', ', array_map('self::escape', $val)) . ']';
+			case $val instanceof Escapable:
+				return $val->escaped();
 			default:
-				throw new LogicException("Unsupported type of value:`" . gettype($val) . "'.");
+				throw new LogicException("Unsupported type of value: '" . gettype($val) . "'.");
 		}
 	}
 
+}
+
+
+
+/**
+ * Poskytne možost pro vlastní escapování objektů.
+ */
+interface Escapable
+{
+	function escaped();
 }
