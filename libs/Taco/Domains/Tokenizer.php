@@ -194,6 +194,27 @@ class Tokenizer
 
 
 
+	private static function parseArgs2($source)
+	{
+		switch (true) {
+			// string
+			case $source[0] == '"':
+				return self::parseText(substr($source, 1), '"');
+			// numeric
+			case preg_match('~^(\d+)(.*)~s', $source, $matches):
+				return array(self::buildArgs('numeric', $matches[1]), $matches[2]);
+			// bool
+			case strtolower(substr($source, 0, 4)) == 'true':
+				return array(self::buildArgs('bool', true), substr($source, 4));
+			case strtolower(substr($source, 0, 5)) == 'false':
+				return array(self::buildArgs('bool', false), substr($source, 5));
+			default:
+				throw new InvalidArgumentException("Unsuported args: `{$source}'.");
+		}
+	}
+
+
+
 	private static function parseText($str, $quote)
 	{
 		// Prázdný řetězec.
@@ -229,7 +250,9 @@ class Tokenizer
 		// ...
 		$i = strpos($str, $bracket);
 		return array(
-			self::buildArgs('tuple', array_map('trim', explode($delimiter, substr($str, 0, $i)))),
+			self::buildArgs('tuple', array_map(function($x) {
+				return self::castValue(self::parseArgs2(trim($x))[0]);
+			}, explode($delimiter, substr($str, 0, $i)))),
 			substr($str, $i + 1) ?: ''
 		);
 	}
