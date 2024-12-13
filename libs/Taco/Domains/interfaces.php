@@ -155,3 +155,19 @@ interface Remove
 	function getFilter();
 
 }
+
+
+
+/**
+ * Formátování objektu do lidsky čitelné podoby.
+ * @author Martin Takáč <martin@takac.name>
+ */
+interface Printable
+{
+
+	/**
+	 * @return string
+	 */
+	function toPrintable();
+
+}

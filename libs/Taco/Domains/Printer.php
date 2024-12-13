@@ -99,6 +99,8 @@ class Printer
 			case $expr instanceof ExprIsNull:
 			case $expr instanceof ExprIsNotNull:
 				return "{$expr->prop()} {$expr->type()}";
+			case $expr instanceof Printable:
+				return $expr->toPrintable();
 			default:
 				throw new LogicException("Unsupported `" . get_class($expr) . "'.");
 		}
