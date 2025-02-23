@@ -6,6 +6,8 @@
 
 namespace Taco\Domains;
 
+use LogicException;
+
 
 /**
  * Výraz
@@ -576,7 +578,7 @@ class ExprNot extends Expr
 
 
 
-class ExprInSubquery extends Expr
+class ExprInSubquery extends Expr implements Printable
 {
 
 	/**
@@ -585,6 +587,28 @@ class ExprInSubquery extends Expr
 	function type()
 	{
 		return 'in';
+	}
+
+
+
+	function toPrintable()
+	{
+		return $this->prop() . ' IN ' .
+			self::format($this->value());
+	}
+
+
+
+	private static function format($src): string
+	{
+		switch (True) {
+			case $src instanceof IExpr:
+				return Printer::formatWhere($src);
+			case $src instanceof Printable:
+				return $src->toPrintable();
+			default:
+				throw new LogicException("Unprintable value: expected IExpr or Printable");
+		}
 	}
 
 }
