@@ -136,7 +136,7 @@ class Printer
 			case is_string($val):
 				return '"' . $val . '"';
 			case is_array($val):
-				return '[' . implode(', ', array_map('self::escape', $val)) . ']';
+				return '(' . implode(', ', array_map('self::escape', $val)) . ')';
 			case $val instanceof Escapable:
 				return $val->escaped();
 			default:
