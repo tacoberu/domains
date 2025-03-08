@@ -8,19 +8,19 @@ namespace Taco\Domains;
 
 use InvalidArgumentException;
 use Exception;
-use PHPUnit_Framework_TestCase;
+use PHPUnit\Framework\TestCase;
 
 
 /**
- * @call phpunit CriteriaTest.php CriteriaTest
  * @author Martin Takáč <martin@takac.name>
  */
-class CriteriaTest extends PHPUnit_Framework_TestCase
+class CriteriaTest extends TestCase
 {
 
 	function testFail()
 	{
-		$this->setExpectedException(InvalidArgumentException::class, 'Type object of criteria not found.');
+		$this->expectException(InvalidArgumentException::class);
+		$this->expectExceptionMessage('Type object of criteria not found.');
 		new Criteria(Null);
 	}
 
@@ -201,7 +201,8 @@ class CriteriaTest extends PHPUnit_Framework_TestCase
 	 */
 	function testFreeze()
 	{
-		$this->setExpectedException(InvalidStateException::class, 'Cannot modify a frozen object Taco\Domains\Criteria.');
+		$this->expectException(InvalidStateException::class);
+		$this->expectExceptionMessage('Cannot modify a frozen object Taco\Domains\Criteria.');
 		$a = Criteria::create('Domains\Album')
 			->where('id', 5)
 			->where('id IN', array(1, 3, 4))
@@ -213,7 +214,6 @@ class CriteriaTest extends PHPUnit_Framework_TestCase
 		$this->assertTrue($a->isFrozen());
 		$a->where('count', 6);
 	}
-
 
 
 
@@ -234,7 +234,6 @@ class CriteriaTest extends PHPUnit_Framework_TestCase
 
 
 
-
 	function testCriteriaFromExample2()
 	{
 		$inst = Criteria::range('Article', 20)
@@ -252,7 +251,6 @@ class CriteriaTest extends PHPUnit_Framework_TestCase
 
 
 
-
 	function _testCriteriaFromExample3()
 	{
 		$inst = Criteria::count('Article')
@@ -266,7 +264,6 @@ class CriteriaTest extends PHPUnit_Framework_TestCase
 		$this->assertEquals(array(), $inst->getOrderBy());
 		$this->assertEquals('(fileInfo = 400)', (string) $inst->getWhere());
 	}
-
 
 
 

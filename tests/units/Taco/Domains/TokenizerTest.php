@@ -6,11 +6,11 @@
 
 namespace Taco\Domains;
 
-use PHPUnit_Framework_TestCase;
+use PHPUnit\Framework\TestCase;
 use InvalidArgumentException;
 
 
-class TokenizerTest extends PHPUnit_Framework_TestCase
+class TokenizerTest extends TestCase
 {
 
 	/**
@@ -18,7 +18,8 @@ class TokenizerTest extends PHPUnit_Framework_TestCase
 	 */
 	function testParseExprEmpty($expr)
 	{
-		$this->setExpectedException(InvalidArgumentException::class, 'Empty expression.');
+		$this->expectException(InvalidArgumentException::class);
+		$this->expectExceptionMessage('Empty expression.');
 		$tok = new Tokenizer();
 		$tok->parseExpr($expr);
 	}
@@ -30,7 +31,8 @@ class TokenizerTest extends PHPUnit_Framework_TestCase
 	 */
 	function testParseCondsEmpty($expr)
 	{
-		$this->setExpectedException(InvalidArgumentException::class, 'Empty expression.');
+		$this->expectException(InvalidArgumentException::class);
+		$this->expectExceptionMessage('Empty expression.');
 		$tok = new Tokenizer();
 		$tok->parseConds($expr);
 	}

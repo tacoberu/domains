@@ -6,14 +6,13 @@
 
 namespace Taco\Domains;
 
-use PHPUnit_Framework_TestCase;
+use PHPUnit\Framework\TestCase;
 
 
 /**
- * @call phpunit ExprTest.php
  * @author Martin Takáč <martin@takac.name>
  */
-class ExprTest extends PHPUnit_Framework_TestCase
+class ExprTest extends TestCase
 {
 
 	function testExprIs()

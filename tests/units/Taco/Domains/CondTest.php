@@ -7,14 +7,13 @@
 namespace Taco\Domains;
 
 use InvalidArgumentException;
-use PHPUnit_Framework_TestCase;
+use PHPUnit\Framework\TestCase;
 
 
 /**
- * @call phpunit CondTest.php CondTest
  * @author Martin Takáč <martin@takac.name>
  */
-class CondTest extends PHPUnit_Framework_TestCase
+class CondTest extends TestCase
 {
 
 	function testAndEmpty()

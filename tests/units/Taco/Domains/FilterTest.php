@@ -6,21 +6,21 @@
 
 namespace Taco\Domains;
 
-use PHPUnit_Framework_TestCase;
+use PHPUnit\Framework\TestCase;
 use InvalidArgumentException;
 
 
 /**
- * @call phpunit FilterTest.php
  * @author Martin Takáč <martin@takac.name>
  */
-class FilterTest extends PHPUnit_Framework_TestCase
+class FilterTest extends TestCase
 {
 
 
 	function testFail()
 	{
-		$this->setExpectedException(InvalidArgumentException::class, 'Type object of filter not found.');
+		$this->expectException(InvalidArgumentException::class);
+		$this->expectExceptionMessage('Type object of filter not found.');
 		$a = new Filter(Null);
 	}
 
@@ -71,7 +71,8 @@ class FilterTest extends PHPUnit_Framework_TestCase
 
 	function _testCondDuplicateFail()
 	{
-		$this->setExpectedException(InvalidArgumentException::class, 'Očekáváme právě jeden parametr.');
+		$this->expectException(InvalidArgumentException::class);
+		$this->expectExceptionMessage('Očekáváme právě jeden parametr.');
 		$a = (new Filter('Article'))
 			->where('id', 4, 7);
 	}
@@ -132,7 +133,8 @@ class FilterTest extends PHPUnit_Framework_TestCase
 
 	function testFreeze()
 	{
-		$this->setExpectedException(InvalidStateException::class, 'Cannot modify a frozen object Taco\Domains\Filter.');
+		$this->expectException(InvalidStateException::class);
+		$this->expectExceptionMessage('Cannot modify a frozen object Taco\Domains\Filter.');
 		$a = (new Filter('Article'))
 			->where('id', 5)
 			->where('id IN', array(1, 3, 4))

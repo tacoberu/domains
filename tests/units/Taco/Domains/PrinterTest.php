@@ -6,14 +6,13 @@
 
 namespace Taco\Domains;
 
-use PHPUnit_Framework_TestCase;
+use PHPUnit\Framework\TestCase;
 
 
 /**
- * @call phpunit FormaterTest.php tests_libs_taco_dhe_FormaterTest
  * @author Martin Takáč <martin@takac.name>
  */
-class PrinterTest extends PHPUnit_Framework_TestCase
+class PrinterTest extends TestCase
 {
 
 	/**

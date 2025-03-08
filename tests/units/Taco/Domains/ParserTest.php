@@ -6,20 +6,20 @@
 
 namespace Taco\Domains;
 
-use PHPUnit_Framework_TestCase;
+use PHPUnit\Framework\TestCase;
 use InvalidArgumentException;
 
 
 /**
- * @call phpunit ParserTest.php
  * @author Martin Takáč <martin@takac.name>
  */
-class ParserTest extends PHPUnit_Framework_TestCase
+class ParserTest extends TestCase
 {
 
 	function testEmpty()
 	{
-		$this->setExpectedException(InvalidArgumentException::class, 'Empty where-conds.');
+		$this->expectException(InvalidArgumentException::class);
+		$this->expectExceptionMessage('Empty where-conds.');
 		Parser::parseWhere('');
 	}
 
@@ -27,7 +27,8 @@ class ParserTest extends PHPUnit_Framework_TestCase
 
 	function testFailRequireArg()
 	{
-		$this->setExpectedException(InvalidArgumentException::class, 'Unexcepted bound of arguments. Require 0s index.');
+		$this->expectException(InvalidArgumentException::class);
+		$this->expectExceptionMessage('Unexcepted bound of arguments. Require 0s index.');
 		Parser::parseWhere('id =');
 	}
 
@@ -35,7 +36,8 @@ class ParserTest extends PHPUnit_Framework_TestCase
 
 	function testFailRequireArg2()
 	{
-		$this->setExpectedException(InvalidArgumentException::class, 'Unexcepted bound of arguments. Require 0s index.');
+		$this->expectException(InvalidArgumentException::class);
+		$this->expectExceptionMessage('Unexcepted bound of arguments. Require 0s index.');
 		Parser::parseWhere('id');
 	}
 
@@ -43,7 +45,8 @@ class ParserTest extends PHPUnit_Framework_TestCase
 
 	function _testFailRequireArg3()
 	{
-		$this->setExpectedException(InvalidArgumentException::class, 'Unexcepted bound of arguments. Require 0s index.');
+		$this->expectException(InvalidArgumentException::class);
+		$this->expectExceptionMessage('Unexcepted bound of arguments. Require 0s index.');
 		Parser::parseWhere('id', [1, 5]);
 	}
 
