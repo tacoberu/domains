@@ -190,6 +190,9 @@ class Printer
 				return '"' . $val . '"';
 			case is_array($val):
 				return '(' . implode(', ', array_map('self::escape', $val)) . ')';
+			case $val instanceof \DateTime:
+			case $val instanceof \DateTimeInterface:
+				return '"' . $val->format($val::W3C) . '"';
 			case $val instanceof Escapable:
 				return $val->escaped();
 			default:
