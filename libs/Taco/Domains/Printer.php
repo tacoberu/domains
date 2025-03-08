@@ -108,6 +108,59 @@ class Printer
 
 
 
+	static function formatValue($val): string
+	{
+		switch (True) {
+			case $val === Null:
+				return 'Null';
+			case $val === True:
+				return 'True';
+			case $val === False:
+				return 'False';
+			case $val instanceof Printable:
+				return $val->toPrintable();
+			case is_string($val):
+				return json_encode($val, JSON_UNESCAPED_UNICODE);
+			case is_scalar($val):
+				return $val;
+
+			case is_array($val):
+				$index = 0;
+				foreach ($val as $k => $v) {
+					// Pokud jsou indexy nepřerušená číselná řada, nebudeme je zobrazovat.
+					if ($k !== $index) {
+						$index == Null;
+					}
+					else {
+						$index++;
+					}
+					$val[$k] = self::formatValue($v);
+				}
+				if ( ! $index) {
+					foreach ($val as $k => $v) {
+						$val[$k] = "{$k}: {$v}";
+					}
+				}
+				return '[' . implode(', ', $val) . ']';
+
+			case $val instanceof \DateTime:
+			case $val instanceof \DateTimeInterface:
+				return '"' . $val->format($val::W3C) . '"';
+
+			case $val instanceof \stdClass:
+				$val = (array) $val;
+				foreach ($val as $k => $v) {
+					$val[$k] = "{$k}: " . self::formatValue($v);
+				}
+				return '{' . implode(', ', $val) . '}';
+
+			default:
+				throw new LogicException("Unsupported type of value: '" . gettype($val) . "'.");
+		}
+	}
+
+
+
 	private static function formatLimitOffset(Criteria $criteria)
 	{
 		if ($criteria->getLimit() || $criteria->getOffset()) {

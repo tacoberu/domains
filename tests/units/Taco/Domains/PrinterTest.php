@@ -247,4 +247,35 @@ class PrinterTest extends TestCase
 		];
 	}
 
+
+
+	/**
+	 * @dataProvider provideFormatValue
+	 */
+	function testFormatValue($val, $expected)
+	{
+		$this->assertEquals($expected, Printer::formatValue($val));
+	}
+
+
+
+	function provideFormatValue()
+	{
+		return [
+			[Null, 'Null'],
+			[True, 'True'],
+			[False, 'False'],
+			[1, '1'],
+			['1', '"1"'],
+			["O'Conor", '"O\'Conor"'],
+			["O\"Conor", '"O\"Conor"'],
+			[["1"], '["1"]'],
+			[["1", "A", "-"], '["1", "A", "-"]'],
+			[[4 => "1", "A", "-"], '[4: "1", 5: "A", 6: "-"]'],
+			[["x" => 42], '[x: 42]'],
+			[(object) ["x" => 42], '{x: 42}'],
+			[(object) ["x" => 42, new \DateTime("2012-01-02 01:03:22")], '{x: 42, 0: "2012-01-02T01:03:22+00:00"}'],
+		];
+	}
+
 }
