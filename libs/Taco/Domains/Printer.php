@@ -189,7 +189,7 @@ class Printer
 			case is_string($val):
 				return '"' . $val . '"';
 			case is_array($val):
-				return '(' . implode(', ', array_map('self::escape', $val)) . ')';
+				return '(' . implode(', ', array_map([self::class, 'escape'], $val)) . ')';
 			case $val instanceof \DateTime:
 			case $val instanceof \DateTimeInterface:
 				return '"' . $val->format($val::W3C) . '"';
