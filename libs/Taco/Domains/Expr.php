@@ -401,9 +401,9 @@ class ExprIn extends Expr
 
 	/**
 	 * @param string $lft
-	 * @param array<mixed> $rgt
+	 * @param array<mixed>|Bind $rgt
 	 */
-	function __construct($lft, array $rgt)
+	function __construct($lft, $rgt)
 	{
 		parent::__construct($lft, $rgt);
 	}
@@ -421,18 +421,23 @@ class ExprIn extends Expr
 
 
 	/**
-	 * @return array<mixed>
+	 * @return array<mixed>|Bind
 	 */
 	function value()
 	{
-		return (array)parent::value();
+		$v = parent::value();
+		return $v instanceof Bind ? $v : (array) $v;
 	}
 
 
 
 	function __toString()
 	{
-		$values = implode(', ', $this->value());
+		$v = parent::value();
+		if ($v instanceof Bind) {
+			return "{$this->prop()} {$this->type()} {$v->escaped()}";
+		}
+		$values = implode(', ', (array) $v);
 		return "{$this->prop()} {$this->type()} ({$values})";
 	}
 
@@ -448,9 +453,9 @@ class ExprNotIn extends Expr
 
 	/**
 	 * @param string $lft
-	 * @param array<mixed> $rgt
+	 * @param array<mixed>|Bind $rgt
 	 */
-	function __construct($lft, array $rgt)
+	function __construct($lft, $rgt)
 	{
 		parent::__construct($lft, $rgt);
 	}
@@ -468,18 +473,23 @@ class ExprNotIn extends Expr
 
 
 	/**
-	 * @return array<mixed>
+	 * @return array<mixed>|Bind
 	 */
 	function value()
 	{
-		return (array)parent::value();
+		$v = parent::value();
+		return $v instanceof Bind ? $v : (array) $v;
 	}
 
 
 
 	function __toString()
 	{
-		$values = implode(', ', $this->value());
+		$v = parent::value();
+		if ($v instanceof Bind) {
+			return "{$this->prop()} {$this->type()} {$v->escaped()}";
+		}
+		$values = implode(', ', (array) $v);
 		return "{$this->prop()} {$this->type()} ({$values})";
 	}
 
